@@ -141,8 +141,9 @@ tfgen init .
 
 Based on our previous configuration, `tfgen` will create the following files:
 
+#### _backend.tf
+
 ```hcl
-# _backend.tf
 terraform {
   backend "s3" {
     bucket         = "my-state-bucket"
@@ -153,18 +154,28 @@ terraform {
     role_arn       = "arn:aws:iam::1111111111:role/terraformRole"
   }
 }
+```
 
-# _provider.tf
+#### _provider.tf
+
+```hcl
 provider "aws" {
   region = "us-east-1"
 }
+```
 
-# _vars.tf
+#### _vars.tf
+
+```hcl
 variable "env" {
   type    = string
   default = "dev"
 }
 ```
+
+### Next steps
+
+After creating the common Terraform files, probably you'll start writing your `main.tf` file. Have fun!
 
 ## tfgen variables
 
