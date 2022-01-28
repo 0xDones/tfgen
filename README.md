@@ -1,6 +1,6 @@
 # tfgen - Terraform boilerplate generator
 
-tfgen, short for Terraform Generator, is a tool to generate boilerplate code for Terraform, based on a yaml configuration file. It's useful for creating a set of pre-defined configuration files with common Terraform definitions like backend, provider, variables, etc. The tool was created mainly to be used on Terraform monorepos that contains multiple environments (different or same AWS accounts for example). This way you can dynamically configure your provider and backend configuration for each module, and also provide common variables.
+tfgen, short for Terraform Generator, is a tool to generate boilerplate code for Terraform, based on a yaml configuration file. It's useful for creating a set of pre-defined configuration files with common Terraform definitions like backend, provider, variables, etc. The tool was created mainly to be used on [Terraform monorepos](https://github.com/refl3ction/terraform-monorepo-example) that contains multiple environments (different or same AWS accounts for example). This way you can dynamically configure your provider and backend configuration for each module, and also provide common variables.
 
 ## Motivation
 
@@ -37,7 +37,7 @@ __Note:__ change `GOOS=darwin` to `linux` or `windows` based on your system
 
 ## Usage
 
-Let's assume we have the following structure:
+Let's assume we have the following structure in our [monorepo](https://github.com/refl3ction/terraform-monorepo-example):
 
 ```md
 .
@@ -53,8 +53,6 @@ Let's assume we have the following structure:
     └── my-custom-module
         └── main.tf
 ```
-
-> You can check a complete monorepo example [here](https://github.com/refl3ction/terraform-monorepo-example)
 
 Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us.
 
@@ -122,6 +120,12 @@ template_files:
     # I'll just be created on modules inside the prod folder
 ```
 
+#### tfgen variables
+
+These variables are injected into the templates:
+
+- `tfgen_working_dir`: The path from the root config file to the working directory
+
 ### Running
 
 Let's create the common files to start writing our Terraform module
@@ -176,9 +180,3 @@ variable "env" {
 ### Next steps
 
 After creating the common Terraform files, probably you'll start writing your `main.tf` file. Have fun!
-
-## tfgen variables
-
-These variables are injected into the templates
-
-- `tfgen_working_dir`: The path from the root config file to the working directory
