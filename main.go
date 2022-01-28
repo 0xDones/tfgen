@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"tfgen/config"
 
@@ -12,7 +11,7 @@ func init() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 
-	log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.FatalLevel)
 }
 
 func main() {
@@ -24,6 +23,6 @@ func main() {
 	}
 
 	mergedConfig := config.MergeAll(configs)
-	println(fmt.Sprintf("Final config: %+v", mergedConfig))
+	// println(fmt.Sprintf("Final config: %+v", mergedConfig))
 	mergedConfig.WriteFiles()
 }
