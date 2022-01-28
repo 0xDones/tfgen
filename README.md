@@ -97,7 +97,7 @@ Now, let's create a config file for the dev and another for the prod environment
 ---
 root_file: false
 vars:
-  aws_accouint: 1111111111
+  aws_account: 1111111111
   aws_region: us-east-1
 template_files:
   _vars.tf: |
@@ -110,7 +110,7 @@ template_files:
 ---
 root_file: false
 vars:
-  aws_accouint: 2222222222
+  aws_account: 2222222222
   aws_region: us-east-2
 template_files:
   _vars.tf: |
@@ -124,10 +124,46 @@ template_files:
 
 ### Running
 
-Now we simply run tfgen
+Let's create the common files to start writing our Terraform module
 
 ```bash
+# Clone our terraform-monorepo-example repo
+git clone git@github.com:refl3ction/terraform-monorepo-example.git
+cd terraform-monorepo-example
+
+# Create a folder for our new module
+mkdir -p infra-live/dev/s3/dev-tfgen-bucket
+cd infra-live/dev/s3/dev-tfgen-bucket
+
+# Generate the files
 tfgen init .
+```
+
+Based on our previous configuration, `tfgen` will create the following files:
+
+```hcl
+# _backend.tf
+terraform {
+  backend "s3" {
+    bucket         = "my-state-bucket"
+    dynamodb_table = "my-lock-table"
+    encrypt        = true
+    key            = "dev/s3/dev-tfgen-bucket/terraform.tfstate"
+    region         = "us-east-1"
+    role_arn       = "arn:aws:iam::1111111111:role/terraformRole"
+  }
+}
+
+# _provider.tf
+provider "aws" {
+  region = "us-east-1"
+}
+
+# _vars.tf
+variable "env" {
+  type    = string
+  default = "dev"
+}
 ```
 
 ## tfgen variables

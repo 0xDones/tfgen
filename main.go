@@ -24,5 +24,6 @@ func main() {
 
 	mergedConfig := config.MergeAll(configs)
 	// println(fmt.Sprintf("Final config: %+v", mergedConfig))
+	println("tfgen created all the files successfully")
 	mergedConfig.WriteFiles()
 }
