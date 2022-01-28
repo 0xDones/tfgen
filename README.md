@@ -179,4 +179,14 @@ variable "env" {
 
 ### Next steps
 
-After creating the common Terraform files, probably you'll start writing your `main.tf` file. Have fun!
+After creating the common Terraform files, probably you'll start writing your `main.tf` file. So at this point, you already know what to do.
+
+```bash
+terraform init
+
+terraform plan -out tf.out
+
+terraform apply tf.out
+```
+
+Have fun!
