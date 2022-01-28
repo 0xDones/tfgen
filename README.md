@@ -60,7 +60,7 @@ Let's create our config files.
 
 ### Configuration file
 
-First we need to create our root config file. Let's create it inside our `infra-live` folder.
+First we need to create our root config file. The program looks recursively from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. Let's create it inside our `infra-live` folder.
 
 ```yaml
 # infra-live/.tfgen.yaml
