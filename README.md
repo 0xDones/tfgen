@@ -1,6 +1,12 @@
 # tfgen - Terraform boilerplate generator
 
-`tfgen`, short for Terraform Generator, is a tool to generate boilerplate code for Terraform, based on a yaml configuration file. It's useful for creating a set of pre-defined configuration files with common Terraform definitions like backend, provider, variables, etc. The tool was created mainly to be used on [Terraform monorepos](https://github.com/refl3ction/terraform-monorepo-example) that contains multiple environments (different or same AWS accounts for example). This way you can dynamically configure your provider and backend configuration for each module, and also provide common variables. By using `tfgen` you'll have the __benefit__ of increase your productivity and reduce the risks of making mistakes during copy+paste operations.
+`tfgen`, short for Terraform Generator, is a tool to generate boilerplate code for Terraform, based on a yaml configuration file. It's useful for creating a set of pre-defined configuration files with common Terraform definitions like backend, provider, variables, etc. The tool was created mainly to be used on [Terraform monorepos](https://github.com/refl3ction/terraform-monorepo-example) that contains multiple environments (different or same AWS accounts for example). This way you can dynamically configure your provider and backend configuration for each module, and also provide common variables.
+
+__Benefits:__
+
+- Increase your productivity.
+- Reduce the risk of making mistakes during copy+paste operations.
+- Scale your monorepo following the same pattern across the modules.
 
 ## Motivation
 
