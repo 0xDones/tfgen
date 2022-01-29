@@ -159,7 +159,7 @@ cd infra-live/dev/s3/dev-tfgen-bucket
 tfgen exec .
 ```
 
-This execution will create all the files declared in the `.tfgen.yaml` files inside the working directory (the directory where you run the command), executing the templates and passing in all the variables declared in the config files.
+This execution will create all the files inside the working directory, executing the templates and passing in all the variables declared in the config files.
 
 The files will look like this:
 
