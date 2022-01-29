@@ -54,14 +54,14 @@ Before we start, let's clone our [terraform-monorepo-example](https://github.com
 │   │   ├── s3
 │   │   ├── security
 │   │   ├── stacks
-│   │   └── .tfgen.yaml
+│   │   └── .tfgen.yaml     # Environment specific config
 │   ├── prod
 │   │   ├── networking
 │   │   ├── s3
 │   │   ├── security
 │   │   ├── stacks
-│   │   └── .tfgen.yaml
-│   └── .tfgen.yaml # Root config file
+│   │   └── .tfgen.yaml     # Environment specific config
+│   └── .tfgen.yaml         # Root config file
 └── modules
     └── my-custom-module
 ```
@@ -100,9 +100,11 @@ template_files:
     }
 ```
 
-#### Specific config
+> Nota that `.aws_region` and `.aws_account` are variables that will be provided in the environment specific config
 
-In the specific config file (non root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
+#### Environment specific config
+
+In the environment specific config file (non root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
 
 ```yaml
 # infra-live/dev/.tfgen
