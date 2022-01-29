@@ -136,9 +136,9 @@ template_files:
     # I'll just be created on modules inside the prod folder
 ```
 
-#### tfgen variables
+#### Internal variables
 
-These variables are injected into the templates:
+These variables are automatically injected into the templates:
 
 - `tfgen_working_dir`: The path from the root config file to the working directory
 
