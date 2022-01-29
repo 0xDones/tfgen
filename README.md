@@ -100,14 +100,14 @@ template_files:
     }
 ```
 
-> Nota that `.aws_region` and `.aws_account` are variables that will be provided in the environment specific config
+> Note that `.aws_region` and `.aws_account` are variables that you need to provide in the environment specific config, on the other side `tfgen_working_dir` is provided by the tool
 
 #### Environment specific config
 
 In the environment specific config file (non root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
 
 ```yaml
-# infra-live/dev/.tfgen
+# infra-live/dev/.tfgen.yaml
 ---
 root_file: false
 vars:
@@ -120,7 +120,7 @@ template_files:
         default = "dev"
     }
 
-# infra-live/prod/.tfgen
+# infra-live/prod/.tfgen.yaml
 ---
 root_file: false
 vars:
@@ -156,7 +156,7 @@ mkdir -p infra-live/dev/s3/dev-tfgen-bucket
 cd infra-live/dev/s3/dev-tfgen-bucket
 
 # Generate the files
-tfgen init .
+tfgen exec .
 ```
 
 This execution will create all the files declared in the `.tfgen.yaml` files inside the working directory (the directory where you run the command), executing the templates and passing in all the variables declared in the config files.
