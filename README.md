@@ -44,30 +44,37 @@ __Note:__ change `GOOS=darwin` to `linux` or `windows` based on your system
 
 ## Usage
 
-Let's assume we have the following structure in our [monorepo](https://github.com/refl3ction/terraform-monorepo-example):
+Before we start, let's clone our [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) repository. All the examples bellow are based on the structure of this repo:
 
 ```md
 .
-├── README.md
 ├── infra-live
 │   ├── dev
 │   │   ├── networking
-│   │   └── s3
-│   └── prod
-│       ├── networking
-│       └── s3
+│   │   ├── s3
+│   │   ├── security
+│   │   ├── stacks
+│   │   └── .tfgen.yaml
+│   ├── prod
+│   │   ├── networking
+│   │   ├── s3
+│   │   ├── security
+│   │   ├── stacks
+│   │   └── .tfgen.yaml
+│   └── .tfgen.yaml # Root config file
 └── modules
     └── my-custom-module
-        └── main.tf
 ```
 
-Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us.
+Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our `.tfgen.yaml` config files.
 
-Let's create our config files.
+### Configuration files
 
-### Configuration file
+`tfgen` creates the files based on a yaml configuration file. It looks recursively from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the files will be merged into the root config file, but the inner configuration have precedence over the outer.
 
-First we need to create our root config file. The program looks recursively from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. Let's create it inside our `infra-live` folder.
+#### Root config
+
+In the root config file, you can set variables that can be used across all environments, and also templates that will be reused.
 
 ```yaml
 # infra-live/.tfgen.yaml
@@ -93,9 +100,9 @@ template_files:
     }
 ```
 
-> We are covering all the possible variables in this example.
+#### Specific config
 
-Now, let's create a config file for the dev and another for the prod environment.
+In the specific config file (non root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
 
 ```yaml
 # infra-live/dev/.tfgen
@@ -138,7 +145,7 @@ These variables are injected into the templates:
 Let's create the common files to start writing our Terraform module
 
 ```bash
-# Clone our terraform-monorepo-example repo
+# If you didn't clone the example repo yet
 git clone git@github.com:refl3ction/terraform-monorepo-example.git
 cd terraform-monorepo-example
 
@@ -150,7 +157,9 @@ cd infra-live/dev/s3/dev-tfgen-bucket
 tfgen init .
 ```
 
-Based on our previous configuration, `tfgen` will create the following files:
+This execution will create all the files declared in the `.tfgen.yaml` files inside the working directory (the directory where you run the command), executing the templates and passing in all the variables declared in the config files.
+
+The files will look like this:
 
 #### _backend.tf
 
