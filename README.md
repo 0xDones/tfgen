@@ -4,6 +4,7 @@
 
 __Benefits:__
 
+- This is not just a tool, it's a way of doing things.
 - Increase your productivity.
 - Reduce the risk of making mistakes during copy+paste operations.
 - Scale your monorepo following the same pattern across the modules.
