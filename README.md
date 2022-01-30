@@ -1,22 +1,26 @@
 # tfgen - Terraform boilerplate generator
 
-`tfgen`, short for Terraform Generator, is a tool to generate boilerplate code for Terraform, based on a yaml configuration file. It's useful for creating a set of pre-defined configuration files with common Terraform definitions like backend, provider, variables, etc. The tool was created mainly to be used on [Terraform monorepos](https://github.com/refl3ction/terraform-monorepo-example) that contains multiple environments (different or same AWS accounts for example). This way you can dynamically configure your provider and backend configuration for each module, and also provide common variables.
+`tfgen`, short for Terraform Generator, is a tool that generates boilerplate code for Terraform. It's powered by yaml files.
 
-__Benefits:__
+## Overview
+
+### What is tfgen
+
+`tfgen` is a tool that's useful for maintaining and scaling a [Terraform Monorepo](https://github.com/refl3ction/terraform-monorepo-example). It is designed to create a set of pre-defined Terraform files with common Terraform definitions like backend, provider, variables, etc, reading all those definitions from yaml configuration files. It is specially useful when you have to maintain multiple environments, in different AWS accounts, that requires different roles to deploy the resources.
+
+### Why tfgen
+
+[Terragrunt](https://github.com/gruntwork-io/terragrunt) - a thin wrapper for Terraform that provides extra tools for working with multiple Terraform modules - is a great tool and inspired me a lot to create `tfgen`, but instead of being a wrapper for the Terraform binary, `tfgen` just creates Terraform files from templates and doesn't interact with Terraform at all. Terraform will be used independently on your local environment or in your CI system to deploy the resources.
 
 - This is not just a tool, it's a way of doing things.
 - Increase your productivity.
-- Reduce the risk of making mistakes during copy+paste operations.
+- Reduce the risk of making mistakes while copying+pasting your backend, provider and other common Terraform definitions.
 - Scale your monorepo following the same pattern across the modules.
 
-## Motivation
+### Features
 
-[Terragrunt](https://github.com/gruntwork-io/terragrunt) is a great tool and inspired me a lot to create `tfgen`, but instead of being a wrapper for the Terraform binary, `tfgen` just creates Terraform files from templates and doesn't interact with Terraform at all. Terraform will be used independently on your local environment or in your CI system to deploy the resources.
-
-## Features
-
-- Create Terraform "common" files from templates in the selected working directory
 - Fill the state key dynamically based on the relative path from the root config file to your working directory
+- Configuration based on yaml files
 - Use go template to generate the files, passing variables to the template dynamically
 
 ## Getting Started
