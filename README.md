@@ -152,7 +152,7 @@ template_files:
     # I'll just be created on modules inside the prod folder
 ```
 
-#### Internal variables
+### Internal variables
 
 These variables are automatically injected into the templates:
 
@@ -211,7 +211,7 @@ variable "env" {
 }
 ```
 
-### Next steps
+## Next steps
 
 After creating the common Terraform files, probably you'll start writing your `main.tf` file. So at this point, you already know what to do.
 
@@ -222,5 +222,10 @@ terraform plan -out tf.out
 
 terraform apply tf.out
 ```
+
+## Related
+
+- [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) - Example repo used in the tutorial
+- [Terragrunt](https://github.com/gruntwork-io/terragrunt) - Tool that inspired me to create `tfgen`
 
 Have fun!
