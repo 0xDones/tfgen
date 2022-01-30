@@ -11,7 +11,7 @@ __Benefits:__
 
 ## Motivation
 
-`Terragrunt` is a great tool and inspired me a lot to create `tfgen`, but instead of being a wrapper for the Terraform binary, `tfgen` just creates Terraform files from templates and doesn't interact with Terraform at all. Terraform will be used independently on your local environment or in your CI system to deploy the resources.
+[Terragrunt](https://github.com/gruntwork-io/terragrunt) is a great tool and inspired me a lot to create `tfgen`, but instead of being a wrapper for the Terraform binary, `tfgen` just creates Terraform files from templates and doesn't interact with Terraform at all. Terraform will be used independently on your local environment or in your CI system to deploy the resources.
 
 ## Features
 
