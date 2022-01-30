@@ -44,6 +44,12 @@ __Note:__ change `GOOS=darwin` to `linux` or `windows` based on your system
 
 ## Usage
 
+```bash
+tfgen exec <working dir>
+```
+
+### Quick Tutorial
+
 Before we start, let's clone our [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) repository. All the examples bellow are based on the structure of this repo:
 
 ```md
