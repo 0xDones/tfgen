@@ -107,13 +107,17 @@ template_files:
         encrypt        = true
         key            = "{{ .tfgen_working_dir }}/terraform.tfstate"
         region         = "{{ .aws_region }}"
-        role_arn       = "arn:aws:iam::{{ .aws_account }}:role/terraformRole"
+        role_arn       = "arn:aws:iam::{{ .aws_account_id }}:role/terraformRole"
       }
     }
   _provider.tf: |
     provider "aws" {
       region = "{{ .aws_region }}"
+      allowed_account_ids = [
+        "{{ .aws_account_id }}"
+      ]
     }
+
 ```
 
 > Note that `.aws_region` and `.aws_account` are variables that you need to provide in the environment specific config, on the other side `tfgen_working_dir` is provided by the tool
@@ -127,7 +131,7 @@ In the environment specific config file (non root), you can pass additional conf
 ---
 root_file: false
 vars:
-  aws_account: 1111111111
+  aws_account_id: 111111111111
   aws_region: us-east-1
 template_files:
   _vars.tf: |
@@ -140,7 +144,7 @@ template_files:
 ---
 root_file: false
 vars:
-  aws_account: 2222222222
+  aws_account_id: 222222222222
   aws_region: us-east-2
 template_files:
   _vars.tf: |
@@ -189,7 +193,7 @@ terraform {
     encrypt        = true
     key            = "dev/s3/dev-tfgen-bucket/terraform.tfstate"
     region         = "us-east-1"
-    role_arn       = "arn:aws:iam::1111111111:role/terraformRole"
+    role_arn       = "arn:aws:iam::111111111111:role/terraformRole"
   }
 }
 ```
@@ -199,6 +203,9 @@ terraform {
 ```hcl
 provider "aws" {
   region = "us-east-1"
+  allowed_account_ids = [
+    "111111111111"
+  ]
 }
 ```
 
