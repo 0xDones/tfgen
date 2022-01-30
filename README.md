@@ -44,12 +44,18 @@ go build
 mv tfgen /usr/local/bin
 ```
 
-__Note:__ change `GOOS=darwin` to `linux` or `windows` based on your system
+__Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `GOOS=windows` based on your system
 
 ## Usage
 
+### Basic Usage
+
 ```bash
+# executing the templates
 tfgen exec <working dir>
+
+# getting help
+tfgen -help
 ```
 
 ### Quick Tutorial
