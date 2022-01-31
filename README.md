@@ -6,15 +6,15 @@
 
 ### What is tfgen
 
-`tfgen` is a tool that's useful for maintaining and scaling a [Terraform Monorepo](https://github.com/refl3ction/terraform-monorepo-example). It is designed to create a set of pre-defined Terraform files with common Terraform definitions like backend, provider, variables, etc, reading all those definitions from yaml configuration files. It is specially useful when you have to maintain multiple environments, in different AWS accounts, that requires different roles to deploy the resources.
+`tfgen` is useful for maintaining and scaling a [Terraform Monorepo](https://github.com/refl3ction/terraform-monorepo-example), that provision resources in a multi environment/account setup. It is designed to create the same Terraform definitions, like backend (with dynamic key), provider, and variables for each environment/account, as defined in a set of yaml configuration files.
 
 ### Why tfgen
 
 [Terragrunt](https://github.com/gruntwork-io/terragrunt) - a thin wrapper for Terraform that provides extra tools for working with multiple Terraform modules - is a great tool and inspired me a lot to create `tfgen`, but instead of being a wrapper for the Terraform binary, `tfgen` just creates Terraform files from templates and doesn't interact with Terraform at all. Terraform will be used independently on your local environment or in your CI system to deploy the resources.
 
 - This is not just a tool, it's a way of doing things.
+- Start writing your modules with the correct configuration for the given environment, while reducing the risk of making mistakes while copying+pasting your backend, provider and other common Terraform definitions.
 - Increase your productivity.
-- Reduce the risk of making mistakes while copying+pasting your backend, provider and other common Terraform definitions.
 - Scale your monorepo following the same pattern across the modules.
 
 ### Features
