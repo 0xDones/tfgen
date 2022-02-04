@@ -119,8 +119,8 @@ template_files:
     }
   _vars.tf: |
     variable "env" {
-        type    = string
-        default = "{{ .env }}"
+      type    = string
+      default = "{{ .env }}"
     }
 
 ```
