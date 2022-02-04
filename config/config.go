@@ -20,6 +20,7 @@ type Config struct {
 
 // NewConfig returns a new Config object
 func NewConfig(byteContent []byte, configFileDir string) *Config {
+	// fmt.Printf("%+v", string(byteContent))
 	workdir, _ := filepath.Abs(path.Dir("."))
 	config := &Config{
 		TemplateFiles:         make(map[string]string),
