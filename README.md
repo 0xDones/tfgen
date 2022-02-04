@@ -177,6 +177,8 @@ tfgen exec .
 
 This execution will create all the files inside the working directory, executing the templates and passing in all the variables declared in the config files.
 
+### Output
+
 The files will look like this:
 
 #### _backend.tf
