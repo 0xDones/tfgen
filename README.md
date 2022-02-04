@@ -117,6 +117,11 @@ template_files:
         "{{ .aws_account_id }}"
       ]
     }
+  _vars.tf: |
+    variable "env" {
+        type    = string
+        default = "{{ .env }}"
+    }
 
 ```
 
@@ -133,12 +138,7 @@ root_file: false
 vars:
   aws_account_id: 111111111111
   aws_region: us-east-1
-template_files:
-  _vars.tf: |
-    variable "env" {
-        type    = string
-        default = "dev"
-    }
+  env: dev
 
 # infra-live/prod/.tfgen.yaml
 ---
@@ -146,13 +146,9 @@ root_file: false
 vars:
   aws_account_id: 222222222222
   aws_region: us-east-2
+  env: prod
 template_files:
-  _vars.tf: |
-    variable "env" {
-        type    = string
-        default = "prod"
-    }
-  example.tf: |
+  additional.tf: |
     # I'll just be created on modules inside the prod folder
 ```
 
