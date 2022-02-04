@@ -173,13 +173,16 @@ cd infra-live/dev/s3/dev-tfgen-bucket
 
 # Generate the files
 tfgen exec .
+
+# Checking the result (See Output section)
+cat _backend.tf _provider.tf _vars.tf
 ```
 
 This execution will create all the files inside the working directory, executing the templates and passing in all the variables declared in the config files.
 
 ### Output
 
-The files will look like this:
+This will be the content of the files created by `tfgen`:
 
 #### _backend.tf
 
