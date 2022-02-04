@@ -90,7 +90,7 @@ Inside our `infra-live` folder, we have two environments, dev and prod. They are
 
 #### Root config
 
-In the root config file, you can set variables that can be used across all environments, and also templates that will be reused.
+In the root config file, you can set variables and templates that can be reused across all environments.
 
 ```yaml
 # infra-live/.tfgen.yaml
