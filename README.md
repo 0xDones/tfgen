@@ -6,22 +6,23 @@
 
 ### What is tfgen
 
-`tfgen` is useful for maintaining and scaling a [Terraform Monorepo](https://github.com/refl3ction/terraform-monorepo-example), that provision resources in a multi environment/account setup. It is designed to create the same Terraform definitions, like backend (with dynamic key), provider, and variables for each environment/account, as defined in a set of yaml configuration files.
+`tfgen` is useful for maintaining and scaling a [Terraform Monorepo](https://github.com/refl3ction/terraform-monorepo-example), in which you provision resources in a multi environment/account setup. It is designed to create consistent Terraform definitions, like backend (with dynamic key), provider, and variables for each environment/account, as defined in a set of yaml configuration files.
 
 ### Why tfgen
 
 [Terragrunt](https://github.com/gruntwork-io/terragrunt) - a thin wrapper for Terraform that provides extra tools for working with multiple Terraform modules - is a great tool and inspired me a lot to create `tfgen`, but instead of being a wrapper for the Terraform binary, `tfgen` just creates Terraform files from templates and doesn't interact with Terraform at all. Terraform will be used independently on your local environment or in your CI system to deploy the resources.
 
-- This is not just a tool, it's a way of doing things.
-- Start writing your modules with the correct configuration for the given environment, while reducing the risk of making mistakes while copying+pasting your backend, provider and other common Terraform definitions.
-- Increase your productivity.
-- Scale your monorepo following the same pattern across the modules.
+- This is not just a tool, it's a way of doing things
+- Keep your Terraform configuration consistent across the environments
+- Reduce the risk of making mistakes while copying+pasting your backend, provider and other common Terraform definitions
+- Increase your productivity
+- Scale your monorepo following the same pattern across the modules
 
 ### Features
 
-- Fill the state key dynamically based on the relative path from the root config file to your working directory
-- Configuration based on yaml files
-- Use go template to generate the files, passing variables to the template dynamically
+- Builtin functionallity to provide the remote state key dynamically
+- YAML file configuration
+- Templates are parsed using `Go templates`
 
 ## Getting Started
 
