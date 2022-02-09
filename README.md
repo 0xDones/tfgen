@@ -87,7 +87,7 @@ Inside our `infra-live` folder, we have two environments, dev and prod. They are
 
 ### Configuration files
 
-`tfgen` works based on yaml configuration files. It searches recursively from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the files are be merged into the root config file, but the inner configuration have precedence over the outer.
+`tfgen` works based on yaml configuration files. It searches recursively from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the files are merged into the root config file, but the inner configuration have precedence over the outer.
 
 #### Root config
 
