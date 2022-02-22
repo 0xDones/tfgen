@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"tfgen/config"
 
@@ -15,7 +16,7 @@ func NewExecCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workingDir := args[0]
-			fmt.Printf("Working Dir: %s\n", workingDir)
+			log.Printf("creating the files inside '%s'\n", workingDir)
 			return exec(workingDir)
 		},
 	}
@@ -34,7 +35,7 @@ func exec(workingDir string) error {
 	}
 
 	mergedConfig := config.MergeAll(configs)
-	println("tfgen created all the files successfully")
+	log.Println("created all the files successfully")
 	mergedConfig.WriteFiles()
 	return nil
 }
