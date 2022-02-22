@@ -130,7 +130,7 @@ template_files:
 
 ```
 
-> Note that `.aws_region` and `.aws_account` are variables that you need to provide in the environment specific config, on the other side `tfgen_working_dir` is provided by the tool
+> Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_working_dir` is provided by the `tfgen`, it will be explained below.
 
 #### Environment specific config
 
