@@ -16,7 +16,6 @@ func NewExecCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			workingDir := args[0]
-			log.Printf("creating the files inside '%s'\n", workingDir)
 			return exec(workingDir)
 		},
 	}
@@ -35,7 +34,8 @@ func exec(workingDir string) error {
 	}
 
 	mergedConfig := config.MergeAll(configs)
-	log.Println("created all the files successfully")
+	log.Printf("creating the files inside '%s'\n", workingDir)
 	mergedConfig.WriteFiles()
+	log.Println("created all the files successfully")
 	return nil
 }
