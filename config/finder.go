@@ -50,7 +50,7 @@ func searchInParentDirs(start string, configFileName string, maxDepth int) (stri
 			return path.Join(currentDir, configFileName), nil
 		}
 	}
-	return "", fmt.Errorf("error: root config file not found")
+	return "", fmt.Errorf("root config file not found")
 }
 
 func readConfigFile(path string) []byte {
