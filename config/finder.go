@@ -14,8 +14,8 @@ const MAX_DEPTH int = 20
 const CONFIG_FILE_NAME string = ".tfgen.yaml"
 
 // GetConfigFiles returns a list of Config objects
-func GetConfigFiles(workingDir string) ([]Config, error) {
-	currentDir := workingDir
+func GetConfigFiles(targetDir string) ([]Config, error) {
+	currentDir := path.Join(".", targetDir)
 	configs := []Config{}
 	for {
 		configFilePath, err := searchInParentDirs(currentDir+"/", CONFIG_FILE_NAME, MAX_DEPTH)
@@ -26,7 +26,7 @@ func GetConfigFiles(workingDir string) ([]Config, error) {
 
 		configFileDir, _ := filepath.Abs(path.Dir(configFilePath))
 		log.Info("config file found at directory: ", configFileDir)
-		config := NewConfig(byteContent, configFileDir)
+		config := NewConfig(byteContent, configFileDir, targetDir)
 		configs = append(configs, *config)
 
 		if !config.RootFile {
