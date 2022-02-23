@@ -1,7 +1,6 @@
 package config
 
 import (
-	"path"
 	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
@@ -12,22 +11,21 @@ type Config struct {
 	RootFile              bool              `yaml:"root_file"`
 	Variables             map[string]string `yaml:"vars"`
 	TemplateFiles         map[string]string `yaml:"template_files"`
-	Workdir               string
+	TargetDir             string
 	ConfigFileDir         string
 	RootConfigFileDir     string
 	RelativePathToWorkdir string
 }
 
 // NewConfig returns a new Config object
-func NewConfig(byteContent []byte, configFileDir string) *Config {
+func NewConfig(byteContent []byte, configFileDir string, targetDir string) *Config {
 	// fmt.Printf("%+v", string(byteContent))
-	workdir, _ := filepath.Abs(path.Dir("."))
+	absTargetDir, _ := filepath.Abs(targetDir)
 	config := &Config{
-		TemplateFiles:         make(map[string]string),
-		Variables:             make(map[string]string),
-		Workdir:               workdir,
-		ConfigFileDir:         configFileDir,
-		RelativePathToWorkdir: ".",
+		TemplateFiles: make(map[string]string),
+		Variables:     make(map[string]string),
+		ConfigFileDir: configFileDir,
+		TargetDir:     absTargetDir,
 	}
 	err := yaml.Unmarshal(byteContent, config)
 	if err != nil {
@@ -65,6 +63,6 @@ func (c *Config) merge(newConfig *Config) {
 
 // setInternalVars will add to Variables all global variables parsed during executing, like working_dir
 func (c *Config) setInternalVars() {
-	c.RelativePathToWorkdir, _ = filepath.Rel(c.ConfigFileDir, c.Workdir)
+	c.RelativePathToWorkdir, _ = filepath.Rel(c.ConfigFileDir, c.TargetDir)
 	c.Variables["tfgen_working_dir"] = c.RelativePathToWorkdir
 }

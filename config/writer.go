@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path"
 	"text/template"
 
 	log "github.com/sirupsen/logrus"
@@ -15,8 +16,7 @@ func (c *Config) WriteFiles() {
 			log.Fatal(err)
 		}
 		log.Info(fmt.Sprintf("writing %s template", templateName))
-
-		f, err := os.Create(templateName)
+		f, err := os.Create(path.Join(c.TargetDir, templateName))
 		if err != nil {
 			log.Fatal(err)
 		}
