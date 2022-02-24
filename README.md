@@ -59,7 +59,7 @@ __Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `G
 # executing the templates
 $ tfgen exec <target dir>
 
-$ tfagen help
+$ tfgen help
 tfgen is a devtool to keep your Terraform code consistent and DRY
 
 Usage:
