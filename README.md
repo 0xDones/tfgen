@@ -57,10 +57,23 @@ __Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `G
 
 ```bash
 # executing the templates
-tfgen exec <working dir>
+$ tfgen exec <target dir>
 
-# getting help
-tfgen -help
+$ tfagen help
+tfgen is a devtool to keep your Terraform code consistent and DRY
+
+Usage:
+  tfgen [command]
+
+Available Commands:
+  completion  Generate the autocompletion script for the specified shell
+  exec        Execute the templates in the given target directory.
+  help        Help about any command
+
+Flags:
+  -h, --help   help for tfgen
+
+Use "tfgen [command] --help" for more information about a command.
 ```
 
 ### Quick Tutorial
