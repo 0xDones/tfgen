@@ -35,7 +35,10 @@ func exec(targetDir string) error {
 
 	mergedConfig := config.MergeAll(configs)
 	log.Printf("creating the files inside '%s'\n", targetDir)
-	mergedConfig.WriteFiles()
+	err = mergedConfig.WriteFiles()
+	if err != nil {
+		return err
+	}
 	log.Println("created all the files successfully")
 	return nil
 }

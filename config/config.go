@@ -18,7 +18,7 @@ type Config struct {
 }
 
 // NewConfig returns a new Config object
-func NewConfig(byteContent []byte, configFileDir string, targetDir string) *Config {
+func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Config, error) {
 	// fmt.Printf("%+v", string(byteContent))
 	absTargetDir, _ := filepath.Abs(targetDir)
 	config := &Config{
@@ -29,9 +29,9 @@ func NewConfig(byteContent []byte, configFileDir string, targetDir string) *Conf
 	}
 	err := yaml.Unmarshal(byteContent, config)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		return nil, err
 	}
-	return config
+	return config, nil
 }
 
 // MergeAll merges all configs into the root config, where the closest to the working directory is the one that will have precedence over the others

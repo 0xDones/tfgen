@@ -22,11 +22,15 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 		if err != nil {
 			return nil, err
 		}
-		byteContent := readConfigFile(configFilePath)
 
+		byteContent := readConfigFile(configFilePath)
 		configFileDir, _ := filepath.Abs(path.Dir(configFilePath))
 		log.Info("config file found at directory: ", configFileDir)
-		config := NewConfig(byteContent, configFileDir, targetDir)
+		config, err := NewConfig(byteContent, configFileDir, targetDir)
+		if err != nil {
+			log.Error("Failed to parse config file")
+			return nil, err
+		}
 		configs = append(configs, *config)
 
 		if !config.RootFile {
