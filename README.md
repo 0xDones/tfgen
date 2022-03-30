@@ -111,7 +111,7 @@ __tfgen__ will recursively look for all `.tfgen.yaml` files from the working dir
 We have two types of configuration files:
 
 1. Root config
-2. Environment cpecific config
+2. Environment specific config
 
 #### Root config
 
