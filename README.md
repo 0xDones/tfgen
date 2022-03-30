@@ -104,11 +104,18 @@ Inside our `infra-live` folder, we have two environments, dev and prod. They are
 
 ### Configuration files
 
-`tfgen` works based on yaml configuration files. It searches recursively from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the files are merged into the root config file, but the inner configuration have precedence over the outer.
+#### How config files are parsed
+
+__tfgen__ will recursively look for all `.tfgen.yaml` files from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
+
+We have two types of configuration files:
+
+1. Root config
+2. Environment cpecific config
 
 #### Root config
 
-In the root config file, you can set variables and templates that can be reused across all environments.
+In the root config file, you can set variables and templates that can be reused across all environments. You need at least 1 root config file.
 
 ```yaml
 # infra-live/.tfgen.yaml
