@@ -60,13 +60,22 @@ func searchInParentDirs(start string, configFileName string, templatesDirName st
 		if configFileErr != nil && templatesDirErr != nil {
 			currentDir = path.Join(currentDir, "..")
 		} else {
-			templateFiles, err := findTemplateFilesInDir(currentDir, templatesDirName)
-			if err != nil {
-				return "", nil, fmt.Errorf("error while searching template dir [%s]: %w", path.Join(currentDir, templatesDirName), err)
+			templateFiles := make(map[string]string)
+
+			if templatesDirErr != nil {
+				results, err := findTemplateFilesInDir(currentDir, templatesDirName)
+				if err != nil {
+					return "", nil, fmt.Errorf("error while searching template dir [%s]: %w", path.Join(currentDir, templatesDirName), err)
+				}
+				for k, v := range results {
+					templateFiles[k] = v
+				}
 			}
+
 			if configFileErr != nil {
 				return path.Join(currentDir, configFileName), templateFiles, nil
 			}
+
 			return "", templateFiles, nil
 		}
 	}
