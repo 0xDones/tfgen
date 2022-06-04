@@ -27,9 +27,11 @@ func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Con
 		ConfigFileDir: configFileDir,
 		TargetDir:     absTargetDir,
 	}
-	err := yaml.Unmarshal(byteContent, config)
-	if err != nil {
-		return nil, err
+	if len(byteContent) > 0 {
+		err := yaml.Unmarshal(byteContent, config)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return config, nil
 }
