@@ -62,7 +62,7 @@ func searchInParentDirs(start string, configFileName string, templatesDirName st
 		} else {
 			templateFiles := make(map[string]string)
 
-			if templatesDirErr != nil {
+			if templatesDirErr == nil {
 				results, err := findTemplateFilesInDir(currentDir, templatesDirName)
 				if err != nil {
 					return "", nil, fmt.Errorf("error while searching template dir [%s]: %w", path.Join(currentDir, templatesDirName), err)
@@ -72,7 +72,7 @@ func searchInParentDirs(start string, configFileName string, templatesDirName st
 				}
 			}
 
-			if configFileErr != nil {
+			if configFileErr == nil {
 				return path.Join(currentDir, configFileName), templateFiles, nil
 			}
 
