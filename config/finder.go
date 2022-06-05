@@ -12,24 +12,27 @@ import (
 
 const MAX_DEPTH int = 20
 const CONFIG_FILE_NAME string = ".tfgen.yaml"
-const TEMPLATES_DIR_NAME string = ".tfgen.d"
+const CONFIG_DIR_NAME string = ".tfgen.d"
 
 // GetConfigFiles returns a list of Config objects
 func GetConfigFiles(targetDir string) ([]Config, error) {
 	currentDir := path.Join(".", targetDir)
 	configs := []Config{}
 	for {
-		configFilePath, templateFiles, err := searchInParentDirs(currentDir+"/", CONFIG_FILE_NAME, TEMPLATES_DIR_NAME, MAX_DEPTH)
+		currentDirAbsolutePath, _ := filepath.Abs(path.Dir(currentDir))
+		configFilePath, templateFiles, err := searchInParentDirs(currentDir+"/", CONFIG_FILE_NAME, CONFIG_DIR_NAME, MAX_DEPTH)
 		if err != nil {
 			return nil, err
 		}
+
 		byteContent := []byte{}
 		if configFilePath != "" {
 			byteContent = readConfigFile(configFilePath)
 		}
-		configFileDir, _ := filepath.Abs(path.Dir(configFilePath))
-		log.Info("config file found at directory: ", configFileDir)
-		config, err := NewConfig(byteContent, configFileDir, targetDir)
+
+		log.Infof("config found in directory: %s", currentDirAbsolutePath)
+
+		config, err := NewConfig(byteContent, currentDirAbsolutePath, targetDir)
 		if err != nil {
 			log.Error("Failed to parse config file")
 			return nil, err
@@ -42,61 +45,123 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 		configs = append(configs, *config)
 
 		if !config.RootFile {
-			currentDir = path.Join(path.Dir(configFilePath), "..")
+			currentDir = path.Join(currentDir, "..")
 		} else {
-			log.Info("root config file found at directory: ", configFileDir)
+			log.Infof("root config file found at directory: %s", currentDirAbsolutePath)
 			return configs, nil
 		}
 	}
 }
 
 // searchInParentDirs looks for the config file from the current working directory to the parent directories, up to the limit defined by the maxDepth param.
-func searchInParentDirs(start string, configFileName string, templatesDirName string, maxDepth int) (string, map[string]string, error) {
+func searchInParentDirs(start string, configFileName string, configDirName string, maxDepth int) (string, map[string]string, error) {
 	currentDir := path.Dir(start)
+	emptyMap := make(map[string]string)
 
 	for i := 0; i < maxDepth; i++ {
-		_, configFileErr := os.Stat(path.Join(currentDir, configFileName))
-		_, templatesDirErr := os.Stat(path.Join(currentDir, templatesDirName))
-		if configFileErr != nil && templatesDirErr != nil {
-			currentDir = path.Join(currentDir, "..")
-		} else {
-			templateFiles := make(map[string]string)
+		configFileRelativePath := findFile(currentDir, configFileName)
+		configDirRelativePath := findFile(currentDir, configDirName)
+		configDirConfigFileRelativePath := findFile(currentDir, configDirName, configFileName)
 
-			if templatesDirErr == nil {
-				results, err := findTemplateFilesInDir(currentDir, templatesDirName)
-				if err != nil {
-					return "", nil, fmt.Errorf("error while searching template dir [%s]: %w", path.Join(currentDir, templatesDirName), err)
-				}
-				for k, v := range results {
-					templateFiles[k] = v
-				}
-			}
+		nothingFound := configFileRelativePath == "" && configDirRelativePath == ""
+		onlyConfigFileFound := configFileRelativePath != "" && configDirRelativePath == ""
+		onlyConfigDirFound := configFileRelativePath == "" && configDirRelativePath != ""
+		bothConfigTypesFound := configFileRelativePath != "" && configDirRelativePath != ""
+		configDirMissingConfig := onlyConfigDirFound && configDirConfigFileRelativePath == ""
 
-			if configFileErr == nil {
-				return path.Join(currentDir, configFileName), templateFiles, nil
-			}
-
-			return "", templateFiles, nil
+		if bothConfigTypesFound {
+			return "", emptyMap, fmt.Errorf("in %s you must use either a config file or config directory but not both", currentDir)
 		}
+
+		if configDirMissingConfig {
+			return "", emptyMap, fmt.Errorf("config dir %s is missing the % file", configDirRelativePath, configFileName)
+		}
+
+		if nothingFound {
+			currentDir = path.Join(currentDir, "..")
+			continue
+		}
+
+		if onlyConfigFileFound {
+			return configFileRelativePath, emptyMap, nil
+		}
+
+		if onlyConfigDirFound {
+			templateFiles, err := findTemplateFiles(configDirRelativePath, []string{configFileName})
+			if err != nil {
+				return "", emptyMap, err
+			}
+			return configDirConfigFileRelativePath, templateFiles, nil
+		}
+
+		return "", emptyMap, fmt.Errorf("unhandled conditions file searching for configs in %s", currentDir)
 	}
-	return "", nil, fmt.Errorf("root config file not found")
+	return "", emptyMap, fmt.Errorf("root config file not found")
 }
 
-func findTemplateFilesInDir(currentDir string, templatesDirName string) (map[string]string, error) {
+func findFile(parts ...string) string {
+	fileName := path.Join(parts...)
+	if _, err := os.Stat(fileName); err != nil {
+		return ""
+	}
+	return fileName
+}
+
+func findConfigFile(currentDir string, configFileName string) string {
+	pathToConfigFile := path.Join(currentDir, configFileName)
+	if _, err := os.Stat(pathToConfigFile); err != nil {
+		return ""
+	}
+	return pathToConfigFile
+}
+
+func findConfigFileInConfigDir(currentDir string, configDirName string, configFileName string) (string, error) {
+	pathToConfigFile := path.Join(currentDir, configDirName, configFileName)
+	if _, err := os.Stat(pathToConfigFile); err != nil {
+		return "", err
+	}
+	return pathToConfigFile, nil
+}
+
+func findTemplateFiles(dirPath string, excludeFiles []string) (map[string]string, error) {
+	emptyMap := make(map[string]string)
+	log.Debugf("scanning files in config dir: %s", dirPath)
+	log.Debugf("exclude files are: %v", excludeFiles)
+
+	// skip search if there is no config dir
+	if _, err := os.Stat(dirPath); err != nil {
+		return emptyMap, fmt.Errorf("directory did not exist: %s", dirPath)
+	}
+
 	templateFiles := make(map[string]string)
-	files, err := ioutil.ReadDir(path.Join(currentDir, templatesDirName))
+
+	files, err := ioutil.ReadDir(dirPath)
 	if err != nil {
-		return nil, err
+		return emptyMap, err
 	}
+
+main:
 	for _, file := range files {
-		if !file.IsDir() {
-			fileContent, err := ioutil.ReadFile(path.Join(currentDir, templatesDirName, file.Name()))
-			if err != nil {
-				return nil, err
-			}
-			templateFiles[file.Name()] = string(fileContent)
+		// do not traverse subdirectories
+		if file.IsDir() {
+			continue
 		}
+
+		for _, excludeFile := range excludeFiles {
+			log.Debugf("checking file: %s, excludeFile: %s", file.Name(), excludeFile)
+			if file.Name() == excludeFile {
+				log.Debugf("skipping file: %s", file.Name())
+				continue main
+			}
+		}
+
+		fileContent, err := ioutil.ReadFile(path.Join(dirPath, file.Name()))
+		if err != nil {
+			return emptyMap, fmt.Errorf("error while trying to read file %s: %w", file.Name(), err)
+		}
+		templateFiles[file.Name()] = string(fileContent)
 	}
+
 	return templateFiles, nil
 }
 

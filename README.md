@@ -27,6 +27,7 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 - Builtin functionallity to provide the remote state key dynamically
 - YAML file configuration
 - Templates are parsed using `Go templates`
+- Support for a config directory containing templates and YAML configuration
 
 ## Getting Started
 
@@ -102,11 +103,41 @@ Before we start, let's clone our [terraform-monorepo-example](https://github.com
 
 Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our `.tfgen.yaml` config files.
 
+Alternatively you can also use a directory to hold your config YAML and template files. You can mix and match plain YAML file or configuration directories but you can only use one per directory. It could look something would look like this:
+
+```md
+.
+├── infra-live
+│   ├── dev
+│   │   |── .tfgen.d          # Environment specific config
+│   │   │   │── .tfgen.yaml
+│   │   │   ├── _data.tf
+│   │   │   └── _vars.tf  
+│   │   ├── networking
+│   │   ├── s3
+│   │   ├── security
+│   │   ├── stacks
+│   │   └── databases
+│   ├── prod
+│   │   |── .tfgen.d          # Environment specific config
+│   │   │   │── .tfgen.yaml
+│   │   │   ├── _data.tf
+│   │   │   └── _vars.tf
+│   │   ├── networking
+│   │   ├── s3
+│   │   ├── security
+│   │   ├── stacks
+│   │   └── databases
+│   └── .tfgen.yaml         # Root config file (could also be a dir)
+└── modules
+    └── my-custom-module
+```
+
 ### Configuration files
 
 #### How config files are parsed
 
-__tfgen__ will recursively look for all `.tfgen.yaml` files from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
+__tfgen__ will recursively look for all `.tfgen.yaml` files or `.tfgen.d` directories from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
 
 We have two types of configuration files:
 
@@ -116,6 +147,8 @@ We have two types of configuration files:
 #### Root config
 
 In the root config file, you can set variables and templates that can be reused across all environments. You need at least 1 root config file.
+
+If you choose to use a directory you can specify some templates in the config file and some as separate files but if you define the same one both ways the separate file will take precedence.
 
 ```yaml
 # infra-live/.tfgen.yaml
@@ -155,6 +188,8 @@ template_files:
 #### Environment specific config
 
 In the environment specific config file (non root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
+
+If you choose to use a directory you can specify some templates in the config file and some as separate files but if you define the same one both ways the separate file will take precedence.
 
 ```yaml
 # infra-live/dev/.tfgen.yaml

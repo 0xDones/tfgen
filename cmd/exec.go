@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"tfgen/config"
 
 	"github.com/spf13/cobra"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func NewExecCmd() *cobra.Command {

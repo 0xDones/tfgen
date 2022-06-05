@@ -12,7 +12,7 @@ func init() {
 	// log.SetFormatter(&log.JSONFormatter{})
 	log.SetOutput(os.Stdout)
 
-	log.SetLevel(log.ErrorLevel)
+	log.SetLevel(log.InfoLevel)
 }
 
 var version string
