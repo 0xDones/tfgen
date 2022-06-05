@@ -295,7 +295,7 @@ There is also a fantastic plugin for IntelliJ Idea which lets you highlight go t
 
 - [intellij-idea-plugin](https://plugins.jetbrains.com/plugin/10581-go-template) - Direct link to the template
 
-`Settings | Editor | File Types` has the place to add your template type. The hidden gem: once started, there is a popup for the type of the underlying template. So I for example you can create `*.tfgen.tf` and then tell it the underlying type is *Terraform* and then _voila_, language sensitive rendering!
+`Settings | Editor | File Types` has the place to add your template type. The hidden gem: once started, there is a popup for the type of the underlying template. So for example you can create `*.tfgen.tf` and then tell it the underlying type is *Terraform* and then _voila_, language sensitive rendering!
 
 ## Related
 
