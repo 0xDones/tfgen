@@ -16,14 +16,20 @@ const CONFIG_DIR_NAME string = ".tfgen.d"
 
 // GetConfigFiles returns a list of Config objects
 func GetConfigFiles(targetDir string) ([]Config, error) {
-	currentDir := path.Join(".", targetDir)
+	currentDir := path.Join(".", targetDir) + string(os.PathSeparator)
 	configs := []Config{}
 	for {
 		currentDirAbsolutePath, _ := filepath.Abs(path.Dir(currentDir))
-		configFilePath, templateFiles, err := searchInParentDirs(currentDir+"/", CONFIG_FILE_NAME, CONFIG_DIR_NAME, MAX_DEPTH)
+		configFilePath, templateFiles, err := searchInParentDirs(currentDir, CONFIG_FILE_NAME, CONFIG_DIR_NAME, MAX_DEPTH)
 		if err != nil {
 			return nil, err
 		}
+
+		log.WithFields(log.Fields{
+			"currentDir":             currentDir,
+			"currentDirAbsolutePath": currentDirAbsolutePath,
+			"configFilePath":         configFilePath,
+		}).Debug("running GetConfigFiles")
 
 		byteContent := []byte{}
 		if configFilePath != "" {
@@ -44,11 +50,11 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 
 		configs = append(configs, *config)
 
-		if !config.RootFile {
-			currentDir = path.Join(currentDir, "..")
-		} else {
+		if config.RootFile {
 			log.Infof("root config file found at directory: %s", currentDirAbsolutePath)
 			return configs, nil
+		} else {
+			currentDir = path.Join(currentDir, "..") + string(os.PathSeparator)
 		}
 	}
 }

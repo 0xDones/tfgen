@@ -7,12 +7,17 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	//"github.com/iancoleman/strcase"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func (c *Config) WriteFiles() error {
 	for templateName, templateBody := range c.TemplateFiles {
+		if c.TemplateNameRewrite != nil {
+			templateName = c.TemplateNameRewrite.Execute(templateName)
+		}
+
 		tpl := template.Must(
 			template.New(templateName).
 				Funcs(sprig.TxtFuncMap()).
@@ -25,8 +30,7 @@ func (c *Config) WriteFiles() error {
 		if err != nil {
 			return err
 		}
-
-		err = tpl.Execute(f, c.Variables)
+		err = tpl.Execute(f, c.TemplateContext)
 		if err != nil {
 			return err
 		}

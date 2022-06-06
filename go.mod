@@ -4,6 +4,8 @@ go 1.17
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.2
+	github.com/iancoleman/strcase v0.2.0
+	github.com/lithammer/dedent v1.1.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.4.0
 	gopkg.in/yaml.v3 v3.0.1
