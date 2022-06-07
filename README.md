@@ -223,28 +223,28 @@ For example, your root might look something like this:
 ---
 root_file: true
 deps:
-    terraform_version: ">= 1.2.1"
-	default_providers:
-	    - aws
-	default_remote_states:
-		- some_project_you_reference_everywhere
-	required_providers:
-		aws:
-	      	source: "hashicorp/aws"
-	      	version: "~> 4.17.0"
-	    tls:
-	      	source: "hashicorp/tls"
-	      	version: "~> 3.4.0"
-	    null:
-	      	source: "hashicorp/null"
-	      	version: "~> 3.1.1"
+  terraform_version: ">= 1.2.1"
+  default_providers:
+	- aws
+  default_remote_states:
+    - some_project_you_reference_everywhere
+  required_providers:
+	aws:
+	  source: "hashicorp/aws"
+	  version: "~> 4.17.0"
+	tls:
+	  source: "hashicorp/tls"
+	  version: "~> 3.4.0"
+	null:
+	  source: "hashicorp/null"
+	  version: "~> 3.1.1"
 	modules:
-    	vpc:
-  		    source: "registry.terraform.io/terraform-aws-modules/vpc/aws"
-  		    version: "~> 3.14.0"
-  	  	rds_aurora:
-  		    source: "registry.terraform.io/terraform-aws-modules/rds-aurora/aws"
-  		    version: "~> 7.1.0"
+      vpc:
+  		source: "registry.terraform.io/terraform-aws-modules/vpc/aws"
+  		version: "~> 3.14.0"
+  	  rds_aurora:
+  		source: "registry.terraform.io/terraform-aws-modules/rds-aurora/aws"
+  		version: "~> 7.1.0"
 
 ```
 
@@ -255,12 +255,12 @@ Somewhere else you might add this:
 ---
 root_file: false
 deps:
-	extra_providers:
-	    - tls
-		- null
-	extra_remote_states:
-	    - networking
-		- security
+  extra_providers:
+    - tls
+    - null
+  extra_remote_states:
+    - networking
+    - security
 ```
 
 `default_providers` can be overridden in other YAML, but it will replace them all just like with `vars`, `extra_providers` are added on so that you can pick and choose which ones are needed for each part of your code. In the tfenv source, there are some functions defined for convenience so you your template for versions.tf could look like this (and it would render all your providers depending on context):
