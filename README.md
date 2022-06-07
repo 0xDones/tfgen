@@ -276,7 +276,7 @@ terraform {
 }
 ```
 
-`default_remote_states` and `extra_remote_states` also work in a similar way but they just hold keys (the varitions of what reference to a remote state might look like make it hard to fully make a dictionary of the whole thing) but in your template someplace you can say things like this (`UsesRemoteState` is another convenience function that checks the union of the two lists) and define as many as you need:
+`default_remote_states` and `extra_remote_states` also work in a similar way but they just hold keys (the varitions of what reference to a remote state might look like make it hard to fully utilize a dictionary for the whole thing like with providers and remote states) but in your template someplace you can say things like this (`UsesRemoteState` is another convenience function that checks the union of the two lists) and define as many as you need:
 
 ```hcl
 {{- if .Deps.UsesRemoteState "my_project" }}{{ "\n" }}
@@ -291,6 +291,16 @@ data "terraform_remote_state" "my_project" {
 }
 {{- end }}
 
+```
+
+Using modules from the `.Deps.Modules` is as simple this (`UseModule` is another built in convenience):
+
+```yaml
+module "my_db_module" {
+  {{ .Deps.UseModule "rds_aurora" | indent 2 | trim }}
+
+  # and other module setup below
+}
 ```
 
 There is also the ability to rewrite the names of the templates when they are rendered in case you like to have one name for the template type to be recognized by IDE and another for once its rendered as plain terraform:
