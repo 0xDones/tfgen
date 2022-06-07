@@ -28,6 +28,8 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 - YAML file configuration
 - Templates are parsed using `Go templates`
 - Support for a config directory containing templates and YAML configuration
+- Manage dependencies for providers/modules in a mappting of key values to source/version etc
+- Some utility functions to make it easier to use those depenencies in templates
 
 ## Getting Started
 
@@ -163,22 +165,22 @@ template_files:
         bucket         = "my-state-bucket"
         dynamodb_table = "my-lock-table"
         encrypt        = true
-        key            = "{{ .tfgen_working_dir }}/terraform.tfstate"
-        region         = "{{ .aws_region }}"
-        role_arn       = "arn:aws:iam::{{ .aws_account_id }}:role/terraformRole"
+        key            = "{{ .Vars.tfgen_working_dir }}/terraform.tfstate"
+        region         = "{{ .Vars.aws_region }}"
+        role_arn       = "arn:aws:iam::{{ .Vars.aws_account_id }}:role/terraformRole"
       }
     }
   _provider.tf: |
     provider "aws" {
-      region = "{{ .aws_region }}"
+      region = "{{ .Vars.aws_region }}"
       allowed_account_ids = [
-        "{{ .aws_account_id }}"
+        "{{ .Vars.aws_account_id }}"
       ]
     }
   _vars.tf: |
     variable "env" {
       type    = string
-      default = "{{ .env }}"
+      default = "{{ .Vars.env }}"
     }
 
 ```
@@ -210,6 +212,93 @@ vars:
 template_files:
   additional.tf: |
     # I'll just be created on modules inside the prod folder
+```
+
+#### Additional YAML config features:
+The `.tfgen.yaml` files specify which type of config they are (`root_file` is true or false). They also may contain dependencies, and variables.
+
+For example, your root might look something like this:
+
+```yaml
+---
+root_file: true
+deps:
+    terraform_version: ">= 1.2.1"
+	default_providers:
+	    - aws
+	default_remote_states:
+		- some_project_you_reference_everywhere
+	required_providers:
+		aws:
+	      	source: "hashicorp/aws"
+	      	version: "~> 4.17.0"
+	    tls:
+	      	source: "hashicorp/tls"
+	      	version: "~> 3.4.0"
+	    null:
+	      	source: "hashicorp/null"
+	      	version: "~> 3.1.1"
+	modules:
+    	vpc:
+  		    source: "registry.terraform.io/terraform-aws-modules/vpc/aws"
+  		    version: "~> 3.14.0"
+  	  	rds_aurora:
+  		    source: "registry.terraform.io/terraform-aws-modules/rds-aurora/aws"
+  		    version: "~> 7.1.0"
+
+```
+
+Somewhere else you might add this:
+
+
+```yaml
+---
+root_file: false
+deps:
+	extra_providers:
+	    - tls
+		- null
+	extra_remote_states:
+	    - networking
+		- security
+```
+
+`default_providers` can be overridden in other YAML, but it will replace them all just like with `vars`, `extra_providers` are added on so that you can pick and choose which ones are needed for each part of your code. In the tfenv source, there are some functions defined for convenience so you your template for versions.tf could look like this (and it would render all your providers depending on context):
+
+```hcl
+terraform {
+  required_version = "{{ .Deps.TerraformVersion}}"
+  required_providers {
+    {{- range $key := concat $.Deps.DefaultProviders $.Deps.ExtraProviders }}
+    {{ $.Deps.RenderRequiredProvider $key | indent 4 | trim }}
+    {{- end }}
+  }
+}
+```
+
+`default_remote_states` and `extra_remote_states` also work in a similar way but they just hold keys (the varitions of what reference to a remote state might look like make it hard to fully make a dictionary of the whole thing) but in your template someplace you can say things like this (`UsesRemoteState` is another convenience function that checks the union of the two lists) and define as many as you need:
+
+```hcl
+{{- if .Deps.UsesRemoteState "my_project" }}{{ "\n" }}
+data "terraform_remote_state" "my_project" {
+  backend = "s3"
+  config = {
+    bucket         = "{{ .Vars.state_s3_bucket }}"
+    dynamodb_table = "{{ .Vars.dynamodb_table }}"
+    key            = "core"
+    region         = "{{ .Vars.state_aws_region }}"
+  }
+}
+{{- end }}
+
+```
+
+There is also the ability to rewrite the names of the templates when they are rendered in case you like to have one name for the template type to be recognized by IDE and another for once its rendered as plain terraform:
+
+```yaml
+template_name_rewrite:
+  pattern: "^(.+)(\\.tfgen.tf)$"
+  replacement: "_$1.tf"
 ```
 
 ### Internal variables
