@@ -225,7 +225,7 @@ root_file: true
 deps:
   terraform_version: ">= 1.2.1"
   default_providers:
-	- aws
+    - aws
   default_remote_states:
     - some_project_you_reference_everywhere
   required_providers:
