@@ -229,22 +229,22 @@ deps:
   default_remote_states:
     - some_project_you_reference_everywhere
   required_providers:
-	aws:
-	  source: "hashicorp/aws"
-	  version: "~> 4.17.0"
-	tls:
-	  source: "hashicorp/tls"
-	  version: "~> 3.4.0"
-	null:
-	  source: "hashicorp/null"
-	  version: "~> 3.1.1"
-	modules:
+    aws:
+      source: "hashicorp/aws"
+      version: "~> 4.17.0"
+    tls:
+      source: "hashicorp/tls"
+      version: "~> 3.4.0"
+    null:
+      source: "hashicorp/null"
+      version: "~> 3.1.1"
+    modules:
       vpc:
-  		source: "registry.terraform.io/terraform-aws-modules/vpc/aws"
-  		version: "~> 3.14.0"
-  	  rds_aurora:
-  		source: "registry.terraform.io/terraform-aws-modules/rds-aurora/aws"
-  		version: "~> 7.1.0"
+        source: "registry.terraform.io/terraform-aws-modules/vpc/aws"
+        version: "~> 3.14.0"
+      rds_aurora:
+        source: "registry.terraform.io/terraform-aws-modules/rds-aurora/aws"
+        version: "~> 7.1.0"
 
 ```
 
