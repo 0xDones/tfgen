@@ -295,7 +295,7 @@ data "terraform_remote_state" "my_project" {
 
 Using modules from the `.Deps.Modules` is as simple this (`UseModule` is another built in convenience):
 
-```yaml
+```hcl
 module "my_db_module" {
   {{ .Deps.UseModule "rds_aurora" | indent 2 | trim }}
 
