@@ -16,6 +16,8 @@ type Config struct {
 	Dependencies          *Dependencies        `yaml:"deps"`
 	Variables             map[string]string    `yaml:"vars"`
 	TemplateFiles         map[string]string    `yaml:"template_files"`
+	ChildDirectories      []string             `yaml:"child_directories"`
+	CleanPattern          string               `yaml:"clean_pattern"`
 	TargetDir             string
 	ConfigFileDir         string
 	RootConfigFileDir     string
@@ -58,11 +60,13 @@ func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Con
 	// fmt.Printf("%+v", string(byteContent))
 	absTargetDir, _ := filepath.Abs(targetDir)
 	config := &Config{
-		Dependencies:  NewDependencies(),
-		TemplateFiles: make(map[string]string),
-		Variables:     make(map[string]string),
-		ConfigFileDir: configFileDir,
-		TargetDir:     absTargetDir,
+		Dependencies:     NewDependencies(),
+		TemplateFiles:    make(map[string]string),
+		Variables:        make(map[string]string),
+		ConfigFileDir:    configFileDir,
+		TargetDir:        absTargetDir,
+		ChildDirectories: []string{},
+		CleanPattern:     "",
 	}
 	if len(byteContent) > 0 {
 		err := yaml.Unmarshal(byteContent, config)
