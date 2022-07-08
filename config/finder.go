@@ -63,46 +63,106 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 func searchInParentDirs(start string, configFileName string, configDirName string, maxDepth int) (string, map[string]string, error) {
 	currentDir := path.Dir(start)
 	emptyMap := make(map[string]string)
-
 	for i := 0; i < maxDepth; i++ {
-		configFileRelativePath := findFile(currentDir, configFileName)
-		configDirRelativePath := findFile(currentDir, configDirName)
-		configDirConfigFileRelativePath := findFile(currentDir, configDirName, configFileName)
-
-		nothingFound := configFileRelativePath == "" && configDirRelativePath == ""
-		onlyConfigFileFound := configFileRelativePath != "" && configDirRelativePath == ""
-		onlyConfigDirFound := configFileRelativePath == "" && configDirRelativePath != ""
-		bothConfigTypesFound := configFileRelativePath != "" && configDirRelativePath != ""
-		configDirMissingConfig := onlyConfigDirFound && configDirConfigFileRelativePath == ""
-
-		if bothConfigTypesFound {
-			return "", emptyMap, fmt.Errorf("in %s you must use either a config file or config directory but not both", currentDir)
+		configStatus, configFileRelativePath, templateMap, err := collateConfig(start, configFileName, configDirName)
+		if err != nil {
+			return "", emptyMap, err
 		}
 
-		if configDirMissingConfig {
-			return "", emptyMap, fmt.Errorf("config dir %s is missing the % file", configDirRelativePath, configFileName)
-		}
-
-		if nothingFound {
+		if configStatus == "NothingFound" {
 			currentDir = path.Join(currentDir, "..")
 			continue
+		} else {
+			return configFileRelativePath, templateMap, nil
 		}
-
-		if onlyConfigFileFound {
-			return configFileRelativePath, emptyMap, nil
-		}
-
-		if onlyConfigDirFound {
-			templateFiles, err := findTemplateFiles(configDirRelativePath, []string{configFileName})
-			if err != nil {
-				return "", emptyMap, err
-			}
-			return configDirConfigFileRelativePath, templateFiles, nil
-		}
-
-		return "", emptyMap, fmt.Errorf("unhandled conditions file searching for configs in %s", currentDir)
 	}
 	return "", emptyMap, fmt.Errorf("root config file not found")
+}
+
+// Examine the TFGEN configuration situation in a specific directory
+func collateConfig(targetDir, configFileName, configDirName string) (string, string, map[string]string, error) {
+
+	currentDir := path.Dir(targetDir)
+	emptyMap := make(map[string]string)
+	configFileRelativePath := findFile(currentDir, configFileName)
+	configDirRelativePath := findFile(currentDir, configDirName)
+	configDirConfigFileRelativePath := findFile(currentDir, configDirName, configFileName)
+
+	nothingFound := configFileRelativePath == "" && configDirRelativePath == ""
+	onlyConfigFileFound := configFileRelativePath != "" && configDirRelativePath == ""
+	onlyConfigDirFound := configFileRelativePath == "" && configDirRelativePath != ""
+	bothConfigTypesFound := configFileRelativePath != "" && configDirRelativePath != ""
+	configDirMissingConfig := onlyConfigDirFound && configDirConfigFileRelativePath == ""
+
+	if bothConfigTypesFound {
+		return "BothConfigTypesFound", "", emptyMap, fmt.Errorf("in %s you must use either a config file or config directory but not both", currentDir)
+	}
+
+	if configDirMissingConfig {
+		return "ConfigDirMissingConfig", "", emptyMap, fmt.Errorf("config dir %s is missing the % file", configDirRelativePath, configFileName)
+	}
+
+	if nothingFound {
+		return "NothingFound", "", emptyMap, nil
+	}
+
+	if onlyConfigFileFound {
+		return "OnlyConfigFileFound", configFileRelativePath, emptyMap, nil
+	}
+
+	if onlyConfigDirFound {
+		templateFiles, err := findTemplateFiles(configDirRelativePath, []string{configFileName})
+		if err != nil {
+			return "OnlyConfigDirFound", "", emptyMap, err
+		}
+		return "OnlyConfigDirFound", configDirConfigFileRelativePath, templateFiles, nil
+	}
+
+	return "", "", emptyMap, fmt.Errorf("unhandled conditions file searching for configs in %s", currentDir)
+}
+
+// Get the configuration in a specified directory. This will expect that configuration to be a 'root' config.
+func GetRootConfig(targetDir string) (*Config, error) {
+	currentDir := path.Join(".", targetDir) + string(os.PathSeparator)
+	currentDirAbsolutePath, _ := filepath.Abs(path.Dir(currentDir))
+	configStatus, configFilePath, templateFiles, err := collateConfig(currentDir, CONFIG_FILE_NAME, CONFIG_DIR_NAME)
+	if err != nil {
+		return nil, err
+	}
+	if configStatus == "NothingFound" {
+		return nil, fmt.Errorf("Unable to locate root config at '%s'", targetDir)
+	}
+
+	log.WithFields(log.Fields{
+		"currentDir":             currentDir,
+		"currentDirAbsolutePath": currentDirAbsolutePath,
+		"ConfigStatus":           configStatus,
+		"configFilePath":         configFilePath,
+	}).Debug("running GetRootConfig")
+
+	byteContent := []byte{}
+	if configFilePath != "" {
+		byteContent = readConfigFile(configFilePath)
+	}
+
+	log.Infof("config found in directory: %s", currentDirAbsolutePath)
+
+	rootConfig, err := NewConfig(byteContent, currentDirAbsolutePath, targetDir)
+	if err != nil {
+		log.Error("Failed to parse config file")
+		return rootConfig, err
+	}
+
+	for k, v := range templateFiles {
+		rootConfig.TemplateFiles[k] = v
+	}
+
+	if !rootConfig.RootFile {
+		return rootConfig, fmt.Errorf("The specified configuration file is not a 'root' config!")
+	}
+
+	log.Infof("root config file found at directory: %s", currentDirAbsolutePath)
+	return rootConfig, nil
 }
 
 func findFile(parts ...string) string {

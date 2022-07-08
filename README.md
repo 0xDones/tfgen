@@ -52,7 +52,7 @@ go build
 mv tfgen /usr/local/bin
 ```
 
-__Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `GOOS=windows` based on your system
+**Note:** when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `GOOS=windows` based on your system
 
 ## Usage
 
@@ -69,14 +69,19 @@ Usage:
   tfgen [command]
 
 Available Commands:
+  clean       Clean up generated template files in given target directory.
+  clean_all   Clean up generated template files in all specified child directories.
   completion  Generate the autocompletion script for the specified shell
   exec        Execute the templates in the given target directory.
+  exec_all    Execute the root config in given target directory and all specified child directories.
   help        Help about any command
 
 Flags:
-  -h, --help   help for tfgen
+  -h, --help               help for tfgen
+  -l, --log-level string   configures the logging level (default "info")
 
 Use "tfgen [command] --help" for more information about a command.
+
 ```
 
 ### Quick Tutorial
@@ -86,21 +91,21 @@ Before we start, let's clone our [terraform-monorepo-example](https://github.com
 ```md
 .
 ├── infra-live
-│   ├── dev
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── .tfgen.yaml     # Environment specific config
-│   ├── prod
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── .tfgen.yaml     # Environment specific config
-│   └── .tfgen.yaml         # Root config file
+│ ├── dev
+│ │ ├── networking
+│ │ ├── s3
+│ │ ├── security
+│ │ ├── stacks
+│ │ └── .tfgen.yaml # Environment specific config
+│ ├── prod
+│ │ ├── networking
+│ │ ├── s3
+│ │ ├── security
+│ │ ├── stacks
+│ │ └── .tfgen.yaml # Environment specific config
+│ └── .tfgen.yaml # Root config file
 └── modules
-    └── my-custom-module
+└── my-custom-module
 ```
 
 Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our `.tfgen.yaml` config files.
@@ -110,36 +115,36 @@ Alternatively you can also use a directory to hold your config YAML and template
 ```md
 .
 ├── infra-live
-│   ├── dev
-│   │   |── .tfgen.d          # Environment specific config
-│   │   │   │── .tfgen.yaml
-│   │   │   ├── _data.tf
-│   │   │   └── _vars.tf  
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── databases
-│   ├── prod
-│   │   |── .tfgen.d          # Environment specific config
-│   │   │   │── .tfgen.yaml
-│   │   │   ├── _data.tf
-│   │   │   └── _vars.tf
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── databases
-│   └── .tfgen.yaml         # Root config file (could also be a dir)
+│ ├── dev
+│ │ |── .tfgen.d # Environment specific config
+│ │ │ │── .tfgen.yaml
+│ │ │ ├── \_data.tf
+│ │ │ └── \_vars.tf  
+│ │ ├── networking
+│ │ ├── s3
+│ │ ├── security
+│ │ ├── stacks
+│ │ └── databases
+│ ├── prod
+│ │ |── .tfgen.d # Environment specific config
+│ │ │ │── .tfgen.yaml
+│ │ │ ├── \_data.tf
+│ │ │ └── \_vars.tf
+│ │ ├── networking
+│ │ ├── s3
+│ │ ├── security
+│ │ ├── stacks
+│ │ └── databases
+│ └── .tfgen.yaml # Root config file (could also be a dir)
 └── modules
-    └── my-custom-module
+└── my-custom-module
 ```
 
 ### Configuration files
 
 #### How config files are parsed
 
-__tfgen__ will recursively look for all `.tfgen.yaml` files or `.tfgen.d` directories from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
+**tfgen** will recursively look for all `.tfgen.yaml` files or `.tfgen.d` directories from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
 
 We have two types of configuration files:
 
@@ -182,7 +187,6 @@ template_files:
       type    = string
       default = "{{ .Vars.env }}"
     }
-
 ```
 
 > Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_working_dir` is provided by the `tfgen`, it will be explained below.
@@ -215,6 +219,7 @@ template_files:
 ```
 
 #### Additional YAML config features:
+
 The `.tfgen.yaml` files specify which type of config they are (`root_file` is true or false). They also may contain dependencies, and variables.
 
 For example, your root might look something like this:
@@ -222,6 +227,10 @@ For example, your root might look something like this:
 ```yaml
 ---
 root_file: true
+target_directories:
+  - "sub-directory/project-a"
+  - "sub-directory/project-b"
+clean_pattern: "_*.tf"
 deps:
   terraform_version: ">= 1.2.1"
   default_providers:
@@ -245,11 +254,9 @@ deps:
     rds_aurora:
       source: "registry.terraform.io/terraform-aws-modules/rds-aurora/aws"
       version: "~> 7.1.0"
-
 ```
 
 Somewhere else you might add this:
-
 
 ```yaml
 ---
@@ -311,6 +318,31 @@ template_name_rewrite:
   replacement: "_$1.tf"
 ```
 
+If you have a heirarchy in place and you'd like to execute the entire chain starting with the root configuration, you can specify child directories. If this is configured, you can run `exec_all` against the directory where your root configuration lives.
+
+```yaml
+target_directories:
+  - "sub-directory/staging-environment/project-a"
+  - "sub-directory/staging-environment/project-b"
+  - "sub-directory/production-environment/project-a"
+```
+
+You may want to delete all files generated by templates. While you could just allow the normal process to overwrite the files as needed, you may decide you no longer need certain files that were generated by templates. In which case, your best option would be to 'clean' them up. If you ever need to delete files generated by templates, you can specify a `clean_pattern`.
+
+```yaml
+clean_pattern: "_*.tf"
+```
+
+You can also define the `clean_pattern` in your root configuration and use the `clean_all` command. If you have a heirarchy in place, you can run the `clean_all` command against the dcirectory where your root configuration lives. Be sure to also define child directories (`target_directories`) so tfgen knows where to look.
+
+```yaml
+clean_pattern: "_*.tf"
+target_directories:
+  - "sub-directory/staging-environment/project-a"
+  - "sub-directory/staging-environment/project-b"
+  - "sub-directory/production-environment/project-a"
+```
+
 ### Internal variables
 
 These variables are automatically injected into the templates:
@@ -343,7 +375,7 @@ This execution will create all the files inside the working directory, executing
 
 This will be the content of the files created by `tfgen`:
 
-#### _backend.tf
+#### \_backend.tf
 
 ```hcl
 terraform {
@@ -358,7 +390,7 @@ terraform {
 }
 ```
 
-#### _provider.tf
+#### \_provider.tf
 
 ```hcl
 provider "aws" {
@@ -369,7 +401,7 @@ provider "aws" {
 }
 ```
 
-#### _vars.tf
+#### \_vars.tf
 
 ```hcl
 variable "env" {
@@ -394,7 +426,7 @@ There is also a fantastic plugin for IntelliJ Idea which lets you highlight go t
 
 - [intellij-idea-plugin](https://plugins.jetbrains.com/plugin/10581-go-template) - Direct link to the template
 
-`Settings | Editor | File Types` has the place to add your template type. The hidden gem: once started, there is a popup for the type of the underlying template. So for example you can create `*.tfgen.tf` and then tell it the underlying type is *Terraform* and then _voila_, language sensitive rendering!
+`Settings | Editor | File Types` has the place to add your template type. The hidden gem: once started, there is a popup for the type of the underlying template. So for example you can create `*.tfgen.tf` and then tell it the underlying type is _Terraform_ and then _voila_, language sensitive rendering!
 
 ## Related
 

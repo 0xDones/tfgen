@@ -28,6 +28,9 @@ func main() {
 	}
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "configures the logging level")
 	rootCmd.AddCommand(cmd.NewExecCmd())
+	rootCmd.AddCommand(cmd.NewExecAllCmd())
+	rootCmd.AddCommand(cmd.NewCleanCmd())
+	rootCmd.AddCommand(cmd.NewCleanAllCmd())
 	rootCmd.PersistentPreRunE = func(cmd *cobra.Command, args []string) error {
 		if err := setUpLogs(os.Stdout, logLevel); err != nil {
 			return err
