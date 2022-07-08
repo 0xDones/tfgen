@@ -34,7 +34,7 @@ func exec_all(targetDir string) error {
 		return err
 	}
 
-	for _, childDir := range rootConfig.ChildDirectories {
+	for _, childDir := range rootConfig.TargetDirectories {
 		childConfigs, err := config.GetConfigFiles(childDir)
 		if err != nil {
 			return err

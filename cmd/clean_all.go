@@ -31,7 +31,7 @@ func clean_all(targetDir string) error {
 	if rootConfig.CleanPattern == "" {
 		return fmt.Errorf("Unable to clean templated files -- no 'clean_pattern' has been defined in root config.")
 	}
-	for _, childDir := range rootConfig.ChildDirectories {
+	for _, childDir := range rootConfig.TargetDirectories {
 		err := config.CleanTemplateFiles(path.Join(targetDir, childDir))
 		if err != nil {
 			return err
