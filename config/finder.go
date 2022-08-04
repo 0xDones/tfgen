@@ -64,7 +64,7 @@ func searchInParentDirs(start string, configFileName string, configDirName strin
 	currentDir := path.Dir(start)
 	emptyMap := make(map[string]string)
 	for i := 0; i < maxDepth; i++ {
-		configStatus, configFileRelativePath, templateMap, err := collateConfig(start, configFileName, configDirName)
+		configStatus, configFileRelativePath, templateMap, err := collateConfig(currentDir, configFileName, configDirName)
 		if err != nil {
 			return "", emptyMap, err
 		}
@@ -103,6 +103,7 @@ func collateConfig(targetDir, configFileName, configDirName string) (string, str
 	}
 
 	if nothingFound {
+		log.Debugf("NothingFound in %s", currentDir)
 		return "NothingFound", "", emptyMap, nil
 	}
 
@@ -171,22 +172,6 @@ func findFile(parts ...string) string {
 		return ""
 	}
 	return fileName
-}
-
-func findConfigFile(currentDir string, configFileName string) string {
-	pathToConfigFile := path.Join(currentDir, configFileName)
-	if _, err := os.Stat(pathToConfigFile); err != nil {
-		return ""
-	}
-	return pathToConfigFile
-}
-
-func findConfigFileInConfigDir(currentDir string, configDirName string, configFileName string) (string, error) {
-	pathToConfigFile := path.Join(currentDir, configDirName, configFileName)
-	if _, err := os.Stat(pathToConfigFile); err != nil {
-		return "", err
-	}
-	return pathToConfigFile, nil
 }
 
 func findTemplateFiles(dirPath string, excludeFiles []string) (map[string]string, error) {
