@@ -70,6 +70,7 @@ func searchInParentDirs(start string, configFileName string, configDirName strin
 		}
 
 		if configStatus == "NothingFound" {
+			log.Debugf("NothingFound status returned, currentDir = %s and will search %s next", currentDir, path.Join(currentDir, ".."))
 			currentDir = path.Join(currentDir, "..")
 			continue
 		} else {
@@ -82,7 +83,13 @@ func searchInParentDirs(start string, configFileName string, configDirName strin
 // Examine the TFGEN configuration situation in a specific directory
 func collateConfig(targetDir, configFileName, configDirName string) (string, string, map[string]string, error) {
 
-	currentDir := path.Dir(targetDir)
+	currentDir := path.Dir(targetDir + "/")
+
+	log.WithFields(log.Fields{
+		"targetDir":  targetDir,
+		"currentDir": currentDir,
+	}).Debug("running collateConfig")
+
 	emptyMap := make(map[string]string)
 	configFileRelativePath := findFile(currentDir, configFileName)
 	configDirRelativePath := findFile(currentDir, configDirName)
