@@ -19,16 +19,14 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 	for {
 		configFilePath, err := searchInParentDirs(currentDir+"/", CONFIG_FILE_NAME, MAX_DEPTH)
 		if err != nil {
-			log.Fatal().Err(err).Msg("")
 			return nil, err
 		}
+		log.Debug().Msgf("config file found: %s", configFilePath)
 
 		byteContent := readConfigFile(configFilePath)
 		configFileDir, _ := filepath.Abs(path.Dir(configFilePath))
-		log.Debug().Msgf("config file found at directory: %s", configFileDir)
 		config, err := NewConfig(byteContent, configFileDir, targetDir)
 		if err != nil {
-			log.Error().Msg("failed to parse config file")
 			return nil, err
 		}
 		configs = append(configs, *config)
@@ -58,10 +56,10 @@ func searchInParentDirs(start string, configFileName string, maxDepth int) (stri
 }
 
 func readConfigFile(path string) []byte {
-	// fmt.Println("Reading config...")
+	log.Debug().Msgf("reading file: %s", path)
 	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed reading config file")
+		log.Fatal().Err(err).Msgf("failed reading file: %s", path)
 	}
 	return data
 }

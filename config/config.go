@@ -23,8 +23,9 @@ type TemplateContext struct {
 
 // NewConfig returns a new Config object
 func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Config, error) {
-	// fmt.Printf("%+v", string(byteContent))
 	absTargetDir, _ := filepath.Abs(targetDir)
+	log.Debug().Msgf("parsing config file: %s", absTargetDir)
+	log.Debug().Msgf("file content: %+v", string(byteContent))
 	config := &Config{
 		TemplateFiles: make(map[string]string),
 		Variables:     make(map[string]string),
@@ -33,6 +34,7 @@ func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Con
 	}
 	err := yaml.Unmarshal(byteContent, config)
 	if err != nil {
+		log.Error().Err(err).Msg("failed to unmarshal config file")
 		return nil, err
 	}
 	return config, nil
