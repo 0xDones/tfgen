@@ -2,12 +2,11 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 const MAX_DEPTH int = 20
@@ -20,15 +19,16 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 	for {
 		configFilePath, err := searchInParentDirs(currentDir+"/", CONFIG_FILE_NAME, MAX_DEPTH)
 		if err != nil {
+			log.Fatal().Err(err).Msg("")
 			return nil, err
 		}
 
 		byteContent := readConfigFile(configFilePath)
 		configFileDir, _ := filepath.Abs(path.Dir(configFilePath))
-		log.Info("config file found at directory: ", configFileDir)
+		log.Debug().Msgf("config file found at directory: %s", configFileDir)
 		config, err := NewConfig(byteContent, configFileDir, targetDir)
 		if err != nil {
-			log.Error("Failed to parse config file")
+			log.Error().Msg("failed to parse config file")
 			return nil, err
 		}
 		configs = append(configs, *config)
@@ -36,7 +36,7 @@ func GetConfigFiles(targetDir string) ([]Config, error) {
 		if !config.RootFile {
 			currentDir = path.Join(path.Dir(configFilePath), "..")
 		} else {
-			log.Info("root config file found at directory: ", configFileDir)
+			log.Debug().Msgf("root config file found at directory: %s", configFileDir)
 			return configs, nil
 		}
 	}
@@ -59,9 +59,9 @@ func searchInParentDirs(start string, configFileName string, maxDepth int) (stri
 
 func readConfigFile(path string) []byte {
 	// fmt.Println("Reading config...")
-	data, err := ioutil.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
-		log.Fatal("Failed reading config file")
+		log.Fatal().Err(err).Msg("failed reading config file")
 	}
 	return data
 }

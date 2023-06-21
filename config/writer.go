@@ -1,12 +1,11 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"text/template"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 )
 
 func (c *Config) WriteFiles() error {
@@ -15,14 +14,15 @@ func (c *Config) WriteFiles() error {
 		if err != nil {
 			return err
 		}
-		log.Info(fmt.Sprintf("writing %s template", templateName))
+		log.Debug().Msgf("writing %s template", templateName)
 		f, err := os.Create(path.Join(c.TargetDir, templateName))
 		if err != nil {
+			log.Error().Err(err).Msg("failed to create files")
 			return err
 		}
 
-		err = t.Execute(f, c.Variables)
-		if err != nil {
+		if err := t.Execute(f, c.Variables); err != nil {
+			log.Error().Err(err).Msg("failed to execute templates")
 			return err
 		}
 	}

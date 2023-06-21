@@ -3,7 +3,7 @@ package config
 import (
 	"path/filepath"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -15,6 +15,10 @@ type Config struct {
 	ConfigFileDir         string
 	RootConfigFileDir     string
 	RelativePathToWorkdir string
+}
+
+type TemplateContext struct {
+	Vars map[string]string
 }
 
 // NewConfig returns a new Config object
@@ -36,7 +40,7 @@ func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Con
 
 // MergeAll merges all configs into the root config, where the closest to the working directory is the one that will have precedence over the others
 func MergeAll(cfgs []Config) Config {
-	log.Info("total configs found: ", len(cfgs))
+	log.Debug().Msgf("total configs found: %d", len(cfgs))
 	// rootConfig is always the last one to be read
 	rootConfig := cfgs[len(cfgs)-1]
 	// Iterate over the configs in reverse order

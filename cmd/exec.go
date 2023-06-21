@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"tfgen/config"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/spf13/cobra"
 )
@@ -14,9 +15,9 @@ func NewExecCmd() *cobra.Command {
 		Use:   "exec <target directory>",
 		Short: "Execute the templates in the given target directory.",
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]
-			return exec(targetDir)
+			exec(targetDir)
 		},
 	}
 
@@ -34,11 +35,11 @@ func exec(targetDir string) error {
 	}
 
 	mergedConfig := config.MergeAll(configs)
-	log.Printf("creating the files inside '%s'\n", targetDir)
-	err = mergedConfig.WriteFiles()
-	if err != nil {
+	log.Info().Msgf("creating files on directory '%s'", targetDir)
+	if err := mergedConfig.WriteFiles(); err != nil {
 		return err
 	}
-	log.Println("created all the files successfully")
+
+	log.Info().Msg("all files have been created")
 	return nil
 }
