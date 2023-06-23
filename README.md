@@ -130,27 +130,27 @@ template_files:
         bucket         = "my-state-bucket"
         dynamodb_table = "my-lock-table"
         encrypt        = true
-        key            = "{{ .tfgen_working_dir }}/terraform.tfstate"
-        region         = "{{ .aws_region }}"
-        role_arn       = "arn:aws:iam::{{ .aws_account_id }}:role/terraformRole"
+        key            = "{{ .Vars.tfgen_generated_path }}/terraform.tfstate"
+        region         = "{{ .Vars.aws_region }}"
+        role_arn       = "arn:aws:iam::{{ .Vars.aws_account_id }}:role/terraformRole"
       }
     }
   _provider.tf: |
     provider "aws" {
-      region = "{{ .aws_region }}"
+      region = "{{ .Vars.aws_region }}"
       allowed_account_ids = [
-        "{{ .aws_account_id }}"
+        "{{ .Vars.aws_account_id }}"
       ]
     }
   _vars.tf: |
     variable "env" {
       type    = string
-      default = "{{ .env }}"
+      default = "{{ .Vars.env }}"
     }
 
 ```
 
-> Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_working_dir` is provided by the `tfgen`, it will be explained below.
+> Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_generated_path` is provided by the `tfgen`, it will be explained below.
 
 #### Environment specific config
 
@@ -177,11 +177,11 @@ template_files:
     # I'll just be created on modules inside the prod folder
 ```
 
-### Internal variables
+### Provided Variables
 
 These variables are automatically injected into the templates:
 
-- `tfgen_working_dir`: The path from the root config file to the working directory
+- `tfgen_generated_path`: The path from the root config file to the target directory
 
 ### Running
 
