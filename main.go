@@ -23,5 +23,6 @@ func main() {
 		Version: version,
 	}
 	rootCmd.AddCommand(cmd.NewExecCmd())
+	rootCmd.AddCommand(cmd.NewCleanCmd())
 	rootCmd.Execute()
 }
