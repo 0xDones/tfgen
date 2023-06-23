@@ -14,7 +14,7 @@ import (
 func NewCleanCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "clean <target directory>",
-		Short: "clean templates from the target directory.",
+		Short: "clean templates from the target directory",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]

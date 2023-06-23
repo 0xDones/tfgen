@@ -66,8 +66,9 @@ Usage:
   tfgen [command]
 
 Available Commands:
+  clean       clean templates from the target directory
   completion  Generate the autocompletion script for the specified shell
-  exec        Execute the templates in the given target directory.
+  exec        Execute the templates in the given target directory
   help        Help about any command
 
 Flags:
@@ -104,9 +105,24 @@ Inside our `infra-live` folder, we have two environments, dev and prod. They are
 
 ### Configuration files
 
+The configuration files are written in YAML and have the following structure:
+
+```yaml
+---
+root_file: bool
+vars:
+  var1: value1
+  var2: value2
+template_files:
+  <file_name>: |
+    template content
+  <another_template>: |
+    template content
+```
+
 #### How config files are parsed
 
-__tfgen__ will recursively look for all `.tfgen.yaml` files from the working directory up to the parent directories until it finds the root config file, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
+__tfgen__ will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the __root config file__, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
 
 We have two types of configuration files:
 
@@ -147,7 +163,6 @@ template_files:
       type    = string
       default = "{{ .Vars.env }}"
     }
-
 ```
 
 > Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_generated_path` is provided by the `tfgen`, it will be explained below.

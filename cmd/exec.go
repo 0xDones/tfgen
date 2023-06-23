@@ -15,7 +15,7 @@ import (
 func NewExecCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "exec <target directory>",
-		Short: "Execute the templates in the given target directory.",
+		Short: "Execute the templates in the given target directory",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]
