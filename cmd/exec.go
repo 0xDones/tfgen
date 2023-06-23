@@ -3,7 +3,9 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"tfgen/config"
+	"tfgen/utils"
 
 	"github.com/rs/zerolog/log"
 
@@ -24,19 +26,36 @@ func NewExecCmd() *cobra.Command {
 }
 
 func exec(targetDir string) error {
-	// Check if workindDir is directory and exists
+	// Check if targetDir is a directory and exists
 	if dir, err := os.Stat(targetDir); os.IsNotExist(err) || !dir.IsDir() {
-		return fmt.Errorf("path '%s' is not a directory or doesn't exist", targetDir)
-	}
-
-	configs, err := config.GetConfigFiles(targetDir)
-	if err != nil {
+		err := fmt.Errorf("path '%s' is not a directory or doesn't exist", targetDir)
+		log.Error().Err(err).Msg("")
 		return err
 	}
 
-	mergedConfig := config.MergeAll(configs)
-	log.Info().Msgf("creating files on directory '%s'", targetDir)
-	if err := mergedConfig.WriteFiles(); err != nil {
+	absTargetDir, err := filepath.Abs(targetDir)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to get absolute path")
+	}
+	configHandler := config.NewConfigHandler(absTargetDir)
+	if err := configHandler.ParseConfigFiles(); err != nil {
+		return err
+	}
+
+	configHandler.SetupTemplateContext()
+	log.Debug().Msgf("final config file: %+v", configHandler.ConfigFile)
+	hasError := false
+	for templateName, templateBody := range configHandler.ConfigFile.TemplateFiles {
+		filePath := filepath.Join(configHandler.TargetDir, templateName)
+		if err := utils.WriteFile(filePath, templateBody, configHandler.TemplateContext); err != nil {
+			hasError = true
+		}
+	}
+
+	if hasError {
+		configHandler.CleanupFiles()
+		err := fmt.Errorf("failed to generate one or more templates, please check your configuration")
+		log.Fatal().Err(err).Msg("")
 		return err
 	}
 

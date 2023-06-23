@@ -1,36 +1,28 @@
 package config
 
 import (
-	"path/filepath"
+	"path"
 
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
-type Config struct {
-	RootFile              bool              `yaml:"root_file"`
-	Variables             map[string]string `yaml:"vars"`
-	TemplateFiles         map[string]string `yaml:"template_files"`
-	TargetDir             string
-	ConfigFileDir         string
-	RootConfigFileDir     string
-	RelativePathToWorkdir string
+type ConfigFile struct {
+	RootFile      bool              `yaml:"root_file"`
+	Variables     map[string]string `yaml:"vars"`
+	TemplateFiles map[string]string `yaml:"template_files"`
+	ConfigFileDir string
 }
 
-type TemplateContext struct {
-	Vars map[string]string
-}
-
-// NewConfig returns a new Config object
-func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Config, error) {
-	absTargetDir, _ := filepath.Abs(targetDir)
-	log.Debug().Msgf("parsing config file: %s", absTargetDir)
+// NewConfigFile returns a new Config object
+func NewConfigFile(byteContent []byte, configFilePath string) (*ConfigFile, error) {
+	configFileDir := path.Dir(configFilePath)
+	log.Debug().Msgf("parsing config file: %s", configFilePath)
 	log.Debug().Msgf("file content: %+v", string(byteContent))
-	config := &Config{
+	config := &ConfigFile{
 		TemplateFiles: make(map[string]string),
 		Variables:     make(map[string]string),
 		ConfigFileDir: configFileDir,
-		TargetDir:     absTargetDir,
 	}
 	err := yaml.Unmarshal(byteContent, config)
 	if err != nil {
@@ -40,35 +32,12 @@ func NewConfig(byteContent []byte, configFileDir string, targetDir string) (*Con
 	return config, nil
 }
 
-// MergeAll merges all configs into the root config, where the closest to the working directory is the one that will have precedence over the others
-func MergeAll(cfgs []Config) Config {
-	log.Debug().Msgf("total configs found: %d", len(cfgs))
-	// rootConfig is always the last one to be read
-	rootConfig := cfgs[len(cfgs)-1]
-	// Iterate over the configs in reverse order
-	for i := len(cfgs) - 1; i >= 0; i-- {
-		// Skipping first iteration
-		if i == len(cfgs)-1 {
-			continue
-		}
-		rootConfig.merge(&cfgs[i])
-	}
-	rootConfig.setInternalVars()
-	return rootConfig
-}
-
 // merge overrides existing fields with the ones from the newConfig
-func (c *Config) merge(newConfig *Config) {
+func (c *ConfigFile) merge(newConfig *ConfigFile) {
 	for k, v := range newConfig.Variables {
 		c.Variables[k] = v
 	}
 	for k, v := range newConfig.TemplateFiles {
 		c.TemplateFiles[k] = v
 	}
-}
-
-// setInternalVars will add to Variables all global variables parsed during executing, like working_dir
-func (c *Config) setInternalVars() {
-	c.RelativePathToWorkdir, _ = filepath.Rel(c.ConfigFileDir, c.TargetDir)
-	c.Variables["tfgen_working_dir"] = c.RelativePathToWorkdir
 }
