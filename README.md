@@ -56,9 +56,6 @@ __Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `G
 ### Basic Usage
 
 ```bash
-# executing the templates
-$ tfgen exec <target dir>
-
 $ tfgen help
 tfgen is a devtool to keep your Terraform code consistent and DRY
 
@@ -77,32 +74,6 @@ Flags:
 Use "tfgen [command] --help" for more information about a command.
 ```
 
-### Quick Tutorial
-
-Before we start, let's clone our [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) repository. All the examples bellow are based on the structure of this repo:
-
-```md
-.
-├── infra-live
-│   ├── dev
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── .tfgen.yaml     # Environment specific config
-│   ├── prod
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── .tfgen.yaml     # Environment specific config
-│   └── .tfgen.yaml         # Root config file
-└── modules
-    └── my-custom-module
-```
-
-Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our `.tfgen.yaml` config files.
-
 ### Configuration files
 
 The configuration files are written in YAML and have the following structure:
@@ -114,15 +85,15 @@ vars:
   var1: value1
   var2: value2
 template_files:
-  <file_name>: |
+  template1.tf: |
     template content
-  <another_template>: |
+  template2.tf: |
     template content
 ```
 
 #### How config files are parsed
 
-__tfgen__ will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the __root config file__, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the inner configuration have precedence over the outer.
+__tfgen__ will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the __root config file__, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the __inner config file have precedence over the outer__.
 
 We have two types of configuration files:
 
@@ -198,7 +169,35 @@ These variables are automatically injected into the templates:
 
 - `tfgen_generated_path`: The path from the root config file to the target directory
 
-### Running
+## Practical Example
+
+### Repository Structure
+
+The [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) repository can be used as an example of how to structure your repository to leverage `tfgen` and also follow Terraform best practices.
+
+```md
+.
+├── infra-live
+│   ├── dev
+│   │   ├── networking
+│   │   ├── s3
+│   │   ├── security
+│   │   ├── stacks
+│   │   └── .tfgen.yaml     # Environment specific config
+│   ├── prod
+│   │   ├── networking
+│   │   ├── s3
+│   │   ├── security
+│   │   ├── stacks
+│   │   └── .tfgen.yaml     # Environment specific config
+│   └── .tfgen.yaml         # Root config file
+└── modules
+    └── my-custom-module
+```
+
+Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our configuration defined on the `.tfgen.yaml` config files.
+
+### Running the `exec` command
 
 Let's create the common files to start writing our Terraform module
 
