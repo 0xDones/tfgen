@@ -1,9 +1,8 @@
-package config
+package tfgen
 
 import (
 	"path"
 	"path/filepath"
-	"tfgen/utils"
 
 	"github.com/rs/zerolog/log"
 )
@@ -31,7 +30,7 @@ func NewConfigHandler(targetDir string) *ConfigHandler {
 }
 
 func (c *ConfigHandler) ParseConfigFiles() error {
-	configFiles := []ConfigFile{}
+	var configFiles []ConfigFile
 	targetDir := c.TargetDir
 	for {
 		configFilePath, err := searchInParentDirs(targetDir, CONFIG_FILE_NAME, MAX_ITER)
@@ -40,7 +39,7 @@ func (c *ConfigHandler) ParseConfigFiles() error {
 			return err
 		}
 
-		byteContent := utils.ReadFile(configFilePath)
+		byteContent := ReadFile(configFilePath)
 		config, err := NewConfigFile(byteContent, configFilePath)
 		if err != nil {
 			return err
@@ -87,7 +86,7 @@ func (c *ConfigHandler) SetupTemplateContext() {
 func (c *ConfigHandler) CleanupFiles() error {
 	for templateName := range c.ConfigFile.TemplateFiles {
 		filePath := filepath.Join(c.TargetDir, templateName)
-		err := utils.DeleteFile(filePath)
+		err := DeleteFile(filePath)
 		if err != nil {
 			log.Error().Err(err).Msgf("failed to delete file: %s", templateName)
 			return err

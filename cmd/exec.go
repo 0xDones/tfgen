@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"tfgen/config"
-	"tfgen/utils"
+	"tfgen/tfgen"
 
 	"github.com/rs/zerolog/log"
-
 	"github.com/spf13/cobra"
 )
 
@@ -37,7 +35,7 @@ func exec(targetDir string) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get absolute path")
 	}
-	configHandler := config.NewConfigHandler(absTargetDir)
+	configHandler := tfgen.NewConfigHandler(absTargetDir)
 	if err := configHandler.ParseConfigFiles(); err != nil {
 		return err
 	}
@@ -47,7 +45,7 @@ func exec(targetDir string) error {
 	hasError := false
 	for templateName, templateBody := range configHandler.ConfigFile.TemplateFiles {
 		filePath := filepath.Join(configHandler.TargetDir, templateName)
-		if err := utils.WriteFile(filePath, templateBody, configHandler.TemplateContext); err != nil {
+		if err := tfgen.WriteFile(filePath, templateBody, configHandler.TemplateContext); err != nil {
 			hasError = true
 		}
 	}
