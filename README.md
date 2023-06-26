@@ -117,7 +117,7 @@ template_files:
         bucket         = "my-state-bucket"
         dynamodb_table = "my-lock-table"
         encrypt        = true
-        key            = "{{ .Vars.tfgen_generated_path }}/terraform.tfstate"
+        key            = "{{ .Vars.tfgen_state_key }}/terraform.tfstate"
         region         = "{{ .Vars.aws_region }}"
         role_arn       = "arn:aws:iam::{{ .Vars.aws_account_id }}:role/terraformRole"
       }
@@ -136,7 +136,7 @@ template_files:
     }
 ```
 
-> Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_generated_path` is provided by the `tfgen`, it will be explained below.
+> Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_state_key` is provided by the `tfgen`, it will be explained below.
 
 #### Environment specific config
 
@@ -167,7 +167,7 @@ template_files:
 
 These variables are automatically injected into the templates:
 
-- `tfgen_generated_path`: The path from the root config file to the target directory
+- `tfgen_state_key`: The path from the root config file to the target directory
 
 ## Practical Example
 

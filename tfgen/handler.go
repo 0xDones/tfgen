@@ -78,7 +78,7 @@ func (c *ConfigHandler) SetupTemplateContext() {
 	vars := c.ConfigFile.Variables
 
 	RootToTargetDirRelPath, _ := filepath.Rel(c.ConfigFile.ConfigFileDir, c.TargetDir)
-	vars["tfgen_generated_path"] = RootToTargetDirRelPath
+	vars["tfgen_state_key"] = RootToTargetDirRelPath
 	c.TemplateContext.Vars = vars
 	log.Debug().Msgf("template context: %+v", c.TemplateContext)
 }

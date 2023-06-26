@@ -20,7 +20,6 @@ func NewExecCmd() *cobra.Command {
 			exec(targetDir)
 		},
 	}
-
 }
 
 func exec(targetDir string) error {

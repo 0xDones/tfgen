@@ -20,7 +20,6 @@ func NewCleanCmd() *cobra.Command {
 			clean(targetDir)
 		},
 	}
-
 }
 
 func clean(targetDir string) error {
@@ -35,6 +34,7 @@ func clean(targetDir string) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get absolute path")
 	}
+
 	configHandler := tfgen.NewConfigHandler(absTargetDir)
 	if err := configHandler.ParseConfigFiles(); err != nil {
 		return err
