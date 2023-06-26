@@ -2,43 +2,60 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"tfgen/config"
+	"path/filepath"
+	"tfgen/tfgen"
 
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 func NewExecCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "exec <target directory>",
-		Short: "Execute the templates in the given target directory.",
+		Short: "Execute the templates in the given target directory",
 		Args:  cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]
-			return exec(targetDir)
+			exec(targetDir)
 		},
 	}
-
 }
 
 func exec(targetDir string) error {
-	// Check if workindDir is directory and exists
+	// Check if targetDir is a directory and exists
 	if dir, err := os.Stat(targetDir); os.IsNotExist(err) || !dir.IsDir() {
-		return fmt.Errorf("path '%s' is not a directory or doesn't exist", targetDir)
-	}
-
-	configs, err := config.GetConfigFiles(targetDir)
-	if err != nil {
+		err := fmt.Errorf("path '%s' is not a directory or doesn't exist", targetDir)
+		log.Error().Err(err).Msg("")
 		return err
 	}
 
-	mergedConfig := config.MergeAll(configs)
-	log.Printf("creating the files inside '%s'\n", targetDir)
-	err = mergedConfig.WriteFiles()
+	absTargetDir, err := filepath.Abs(targetDir)
 	if err != nil {
+		log.Fatal().Err(err).Msg("failed to get absolute path")
+	}
+	configHandler := tfgen.NewConfigHandler(absTargetDir)
+	if err := configHandler.ParseConfigFiles(); err != nil {
 		return err
 	}
-	log.Println("created all the files successfully")
+
+	configHandler.SetupTemplateContext()
+	log.Debug().Msgf("final config file: %+v", configHandler.ConfigFile)
+	hasError := false
+	for templateName, templateBody := range configHandler.ConfigFile.TemplateFiles {
+		filePath := filepath.Join(configHandler.TargetDir, templateName)
+		if err := tfgen.WriteFile(filePath, templateBody, configHandler.TemplateContext); err != nil {
+			hasError = true
+		}
+	}
+
+	if hasError {
+		configHandler.CleanupFiles()
+		err := fmt.Errorf("failed to generate one or more templates, please check your configuration")
+		log.Fatal().Err(err).Msg("")
+		return err
+	}
+
+	log.Info().Msg("all files have been created")
 	return nil
 }

@@ -4,15 +4,14 @@ import (
 	"os"
 	"tfgen/cmd"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	// log.SetFormatter(&log.JSONFormatter{})
-	log.SetOutput(os.Stdout)
-
-	log.SetLevel(log.ErrorLevel)
+	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 }
 
 var version string
@@ -24,5 +23,6 @@ func main() {
 		Version: version,
 	}
 	rootCmd.AddCommand(cmd.NewExecCmd())
+	rootCmd.AddCommand(cmd.NewCleanCmd())
 	rootCmd.Execute()
 }
