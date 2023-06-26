@@ -41,12 +41,12 @@ git clone --depth 1 git@github.com:refl3ction/tfgen.git
 cd tfgen
 
 # Using Docker
-docker run --rm -v $PWD:/src -w /src -e GOOS=darwin -e GOARCH=amd64 golang:alpine go build
+docker run --rm -v $PWD:/src -w /src -e GOOS=darwin -e GOARCH=amd64 golang:alpine go build -o bin/tfgen
 
 # Using Go
-go build
+go build -o bin/tfgen
 
-mv tfgen /usr/local/bin
+mv bin/tfgen /usr/local/bin
 ```
 
 __Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `GOOS=windows` based on your system
