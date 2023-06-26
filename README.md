@@ -69,7 +69,8 @@ Available Commands:
   help        Help about any command
 
 Flags:
-  -h, --help   help for tfgen
+  -h, --help      help for tfgen
+  -v, --verbose   verbose output
 
 Use "tfgen [command] --help" for more information about a command.
 ```
