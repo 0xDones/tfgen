@@ -1,5 +1,5 @@
 build:
-	go build
+	go build -o bin/tfgen
 
 install: build
-	mv tfgen /usr/local/bin
+	mv bin/tfgen /usr/local/bin
