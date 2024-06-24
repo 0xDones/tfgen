@@ -1,8 +1,8 @@
 # tfgen - Terraform boilerplate generator
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity)
-[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/refl3ction/tfgen.svg)](https://github.com/refl3ction/tfgen)
-[![GitHub stars](https://img.shields.io/github/stars/refl3ction/tfgen.svg?style=social&label=Star)](https://github.com/refl3ction/tfgen/stargazers/)
+[![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/0xDones/tfgen.svg)](https://github.com/0xDones/tfgen)
+[![GitHub stars](https://img.shields.io/github/stars/0xDones/tfgen.svg?style=social&label=Star)](https://github.com/0xDones/tfgen/stargazers/)
 
 Terragrunt alternative to keep your Terraform code consistent and DRY
 
@@ -10,7 +10,7 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 
 ### What is tfgen
 
-`tfgen` is useful for maintaining and scaling a [Terraform Monorepo](https://github.com/refl3ction/terraform-monorepo-example), in which you provision resources in a multi environment/account setup. It is designed to create consistent Terraform definitions, like backend (with dynamic key), provider, and variables for each environment/account, as defined in a set of yaml configuration files.
+`tfgen` is useful for maintaining and scaling a [Terraform Monorepo](https://github.com/0xDones/terraform-monorepo-example), in which you provision resources in a multi-environment/account setup. It is designed to create consistent Terraform definitions, like backend (with dynamic key), provider, and variables for each environment/account, as defined in a set of YAML configuration files.
 
 ### Why tfgen
 
@@ -18,13 +18,13 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 
 - This is not just a tool, it's a way of doing things
 - Keep your Terraform configuration consistent across the environments
-- Reduce the risk of making mistakes while copying+pasting your backend, provider and other common Terraform definitions
+- Reduce the risk of making mistakes while copying+pasting your backend, provider, and other common Terraform definitions
 - Increase your productivity
-- Scale your monorepo following the same pattern across the modules
+- Scale your mono repo following the same pattern across the modules
 
 ### Features
 
-- Builtin functionallity to provide the remote state key dynamically
+- Builtin functionality to provide the remote state key dynamically
 - YAML file configuration
 - Templates are parsed using `Go templates`
 
@@ -37,7 +37,7 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 ### Installation
 
 ```bash
-git clone --depth 1 git@github.com:refl3ction/tfgen.git
+git clone --depth 1 git@github.com:0xDones/tfgen.git
 cd tfgen
 
 # Using Docker
@@ -94,7 +94,7 @@ template_files:
 
 #### How config files are parsed
 
-__tfgen__ will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the __root config file__, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the __inner config file have precedence over the outer__.
+__tfgen__ will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the __root config file__, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the __inner config file has precedence over the outer__.
 
 We have two types of configuration files:
 
@@ -137,11 +137,11 @@ template_files:
     }
 ```
 
-> Note that `aws_region`, `aws_account` and `env` are variables that you need to provide in the environment specific config. `tfgen_state_key` is provided by the `tfgen`, it will be explained below.
+> Note that `aws_region`, `aws_account`, and `env` are variables that you need to provide in the environment-specific config. `tfgen_state_key` is provided by the `tfgen`, it will be explained below.
 
 #### Environment specific config
 
-In the environment specific config file (non root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
+In the environment-specific config file (non-root), you can pass additional configuration, or override configuration from the root config file. You can have multiple specific config files, all of them will be merged into the root one.
 
 ```yaml
 # infra-live/dev/.tfgen.yaml
@@ -174,7 +174,7 @@ These variables are automatically injected into the templates:
 
 ### Repository Structure
 
-The [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) repository can be used as an example of how to structure your repository to leverage `tfgen` and also follow Terraform best practices.
+The [terraform-monorepo-example](https://github.com/0xDones/terraform-monorepo-example) repository can be used as an example of how to structure your repository to leverage `tfgen` and also follow Terraform best practices.
 
 ```md
 .
@@ -196,7 +196,7 @@ The [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorep
     └── my-custom-module
 ```
 
-Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one have a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our configuration defined on the `.tfgen.yaml` config files.
+Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one has a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our configuration defined on the `.tfgen.yaml` config files.
 
 ### Running the `exec` command
 
@@ -204,7 +204,7 @@ Let's create the common files to start writing our Terraform module
 
 ```bash
 # If you didn't clone the example repo yet
-git clone git@github.com:refl3ction/terraform-monorepo-example.git
+git clone git@github.com:0xDones/terraform-monorepo-example.git
 cd terraform-monorepo-example
 
 # Create a folder for our new module
@@ -261,7 +261,7 @@ variable "env" {
 
 ## Next steps
 
-After creating the common Terraform files, probably you'll start writing your `main.tf` file. So at this point, you already know what to do.
+After creating the common Terraform files, you'll probably start writing your `main.tf` file. So at this point, you already know what to do.
 
 ```bash
 terraform init
@@ -273,7 +273,7 @@ terraform apply tf.out
 
 ## Related
 
-- [terraform-monorepo-example](https://github.com/refl3ction/terraform-monorepo-example) - Example repo used in the tutorial
+- [terraform-monorepo-example](https://github.com/0xDones/terraform-monorepo-example) - Example repo used in the tutorial
 - [Terragrunt](https://github.com/gruntwork-io/terragrunt) - Tool that inspired me to create `tfgen`
 
 Have fun!
