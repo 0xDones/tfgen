@@ -49,7 +49,7 @@ go build -o bin/tfgen
 mv bin/tfgen /usr/local/bin
 ```
 
-__Note:__ when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `GOOS=windows` based on your system
+**Note:** when building using Docker, change `GOOS=darwin` to `GOOS=linux` or `GOOS=windows` based on your system
 
 ## Usage
 
@@ -94,7 +94,7 @@ template_files:
 
 #### How config files are parsed
 
-__tfgen__ will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the __root config file__, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the __inner config file has precedence over the outer__.
+**tfgen** will recursively look for all `.tfgen.yaml` files from the target directory up to the parent directories until it finds the **root config file**, if it doesn't find the file it will exit with an error. All the other files found on the way up are merged into the root config file, and the **inner config file has precedence over the outer**.
 
 We have two types of configuration files:
 
@@ -118,22 +118,22 @@ template_files:
         bucket         = "my-state-bucket"
         dynamodb_table = "my-lock-table"
         encrypt        = true
-        key            = "{{ .Vars.tfgen_state_key }}/terraform.tfstate"
-        region         = "{{ .Vars.aws_region }}"
-        role_arn       = "arn:aws:iam::{{ .Vars.aws_account_id }}:role/terraformRole"
+        key            = "{{ .tfgen_state_key }}/terraform.tfstate"
+        region         = "{{ .aws_region }}"
+        role_arn       = "arn:aws:iam::{{ .aws_account_id }}:role/terraformRole"
       }
     }
   _provider.tf: |
     provider "aws" {
-      region = "{{ .Vars.aws_region }}"
+      region = "{{ .aws_region }}"
       allowed_account_ids = [
-        "{{ .Vars.aws_account_id }}"
+        "{{ .aws_account_id }}"
       ]
     }
   _vars.tf: |
     variable "env" {
       type    = string
-      default = "{{ .Vars.env }}"
+      default = "{{ .env }}"
     }
 ```
 
@@ -179,21 +179,21 @@ The [terraform-monorepo-example](https://github.com/0xDones/terraform-monorepo-e
 ```md
 .
 ├── infra-live
-│   ├── dev
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── .tfgen.yaml     # Environment specific config
-│   ├── prod
-│   │   ├── networking
-│   │   ├── s3
-│   │   ├── security
-│   │   ├── stacks
-│   │   └── .tfgen.yaml     # Environment specific config
-│   └── .tfgen.yaml         # Root config file
+│ ├── dev
+│ │ ├── networking
+│ │ ├── s3
+│ │ ├── security
+│ │ ├── stacks
+│ │ └── .tfgen.yaml # Environment specific config
+│ ├── prod
+│ │ ├── networking
+│ │ ├── s3
+│ │ ├── security
+│ │ ├── stacks
+│ │ └── .tfgen.yaml # Environment specific config
+│ └── .tfgen.yaml # Root config file
 └── modules
-    └── my-custom-module
+└── my-custom-module
 ```
 
 Inside our `infra-live` folder, we have two environments, dev and prod. They are deployed in different aws accounts, and each one has a different role that needs to be assumed in the provider configuration. Instead of copying the files back and forth every time we need to create a new module, we'll let `tfgen` create it for us based on our configuration defined on the `.tfgen.yaml` config files.
@@ -224,7 +224,7 @@ This execution will create all the files inside the working directory, executing
 
 This will be the content of the files created by `tfgen`:
 
-#### _backend.tf
+#### \_backend.tf
 
 ```hcl
 terraform {
@@ -239,7 +239,7 @@ terraform {
 }
 ```
 
-#### _provider.tf
+#### \_provider.tf
 
 ```hcl
 provider "aws" {
@@ -250,7 +250,7 @@ provider "aws" {
 }
 ```
 
-#### _vars.tf
+#### \_vars.tf
 
 ```hcl
 variable "env" {

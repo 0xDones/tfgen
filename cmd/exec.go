@@ -34,25 +34,25 @@ func exec(targetDir string) error {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to get absolute path")
 	}
-	configHandler := tfgen.NewConfigHandler(absTargetDir)
-	if err := configHandler.ParseConfigFiles(); err != nil {
+
+	configHandler, err := tfgen.NewConfigHandler(absTargetDir)
+	if err != nil {
 		return err
 	}
+	log.Debug().Msgf("final config file: %+v", configHandler.MergedConfigFile)
 
-	configHandler.SetupTemplateContext()
-	log.Debug().Msgf("final config file: %+v", configHandler.ConfigFile)
 	hasError := false
-	for templateName, templateBody := range configHandler.ConfigFile.TemplateFiles {
+	for templateName, templateBody := range configHandler.MergedConfigFile.TemplateFiles {
 		filePath := filepath.Join(configHandler.TargetDir, templateName)
-		if err := tfgen.WriteFile(filePath, templateBody, configHandler.TemplateContext); err != nil {
+		if err := tfgen.WriteFile(filePath, templateBody, configHandler.TemplateVars); err != nil {
 			hasError = true
 		}
 	}
 
 	if hasError {
-		configHandler.CleanupFiles()
+		_ = configHandler.CleanupFiles()
 		err := fmt.Errorf("failed to generate one or more templates, please check your configuration")
-		log.Fatal().Err(err).Msg("")
+		log.Error().Err(err).Msg("")
 		return err
 	}
 

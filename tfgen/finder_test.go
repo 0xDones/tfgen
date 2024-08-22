@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSearchInParentDirs(t *testing.T) {
+func TestFindConfigFile(t *testing.T) {
 	assert := assert.New(t)
 	tempDir := t.TempDir()
 	println(tempDir)
@@ -31,7 +31,7 @@ func TestSearchInParentDirs(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		result, _ := searchInParentDirs(tc.input, CONFIG_FILE_NAME, MAX_ITER)
+		result, _ := findConfigFile(tc.input)
 		assert.Equal(tc.want, result, "they should be equal")
 	}
 }

@@ -8,11 +8,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// searchInParentDirs looks for the config file from the current working directory to the parent directories, up to the limit defined by the maxIter param.
-func searchInParentDirs(start string, configFileName string, maxIter int) (string, error) {
-	currentDir := start
-	for i := 0; i < maxIter; i++ {
-		configFilePath := path.Join(currentDir, configFileName)
+// findConfigFile searches up the directory tree looking for the first .tfgen.yaml file.
+// It traverses 20 directories maximum.
+func findConfigFile(startDir string) (string, error) {
+	currentDir := startDir
+	for i := 0; i < MAX_ITER; i++ {
+		configFilePath := path.Join(currentDir, CONFIG_FILE_NAME)
 		log.Debug().Msgf("checking if file exists: %s", configFilePath)
 		_, err := os.Stat(configFilePath)
 		if err != nil {
@@ -22,5 +23,5 @@ func searchInParentDirs(start string, configFileName string, maxIter int) (strin
 			return configFilePath, nil
 		}
 	}
-	return "", fmt.Errorf("config file not found after %d iterations", maxIter)
+	return "", fmt.Errorf("config file not found after %d iterations", MAX_ITER)
 }

@@ -23,7 +23,7 @@ func NewCleanCmd() *cobra.Command {
 }
 
 func clean(targetDir string) error {
-	// Check if workindDir is directory and exists
+	// Check if targetDir is directory and exists
 	if dir, err := os.Stat(targetDir); os.IsNotExist(err) || !dir.IsDir() {
 		err := fmt.Errorf("path '%s' is not a directory or doesn't exist", targetDir)
 		log.Error().Err(err).Msg("")
@@ -35,8 +35,8 @@ func clean(targetDir string) error {
 		log.Fatal().Err(err).Msg("failed to get absolute path")
 	}
 
-	configHandler := tfgen.NewConfigHandler(absTargetDir)
-	if err := configHandler.ParseConfigFiles(); err != nil {
+	configHandler, err := tfgen.NewConfigHandler(absTargetDir)
+	if err != nil {
 		return err
 	}
 
