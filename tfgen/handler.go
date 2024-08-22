@@ -1,6 +1,7 @@
 package tfgen
 
 import (
+	"fmt"
 	"os"
 	"path"
 	"path/filepath"
@@ -54,7 +55,7 @@ func parseConfigFiles(targetDir string) (ConfigFile, error) {
 		configFiles = append(configFiles, *config)
 
 		if config.IsRootFile {
-			log.Debug().Msgf("root config file found: %s", configFilePath)
+			log.Debug().Str("rootConfigPath", configFilePath).Msg("Root config file found")
 			break
 		}
 
@@ -65,7 +66,7 @@ func parseConfigFiles(targetDir string) (ConfigFile, error) {
 
 // mergeFiles merges all other config files into the root file and returns it.
 func mergeFiles(configFiles []ConfigFile) ConfigFile {
-	log.Debug().Msgf("total config files found: %d", len(configFiles))
+	log.Debug().Int("numConfigFiles", len(configFiles)).Msg("Merging config files")
 	// rootConfig is always the last one to be read
 	rootConfig := configFiles[len(configFiles)-1]
 	// Iterate over the other configs in reverse order
@@ -92,8 +93,7 @@ func (c *ConfigHandler) CleanupFiles() error {
 		log.Debug().Msgf("deleting file: %s", filePath)
 		err := os.Remove(filePath)
 		if err != nil {
-			log.Error().Err(err).Msgf("failed to delete file: %s", templateName)
-			return err
+			return fmt.Errorf("failed to delete file: %w", err)
 		}
 	}
 	return nil

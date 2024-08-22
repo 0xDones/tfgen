@@ -37,7 +37,7 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 ### Installation
 
 ```bash
-git clone --depth 1 git@github.com:0xDones/tfgen.git
+git clone --depth 1 git@github.com:sphinxdefense/tfgen.git
 cd tfgen
 
 # Using Docker
@@ -270,10 +270,5 @@ terraform plan -out tf.out
 
 terraform apply tf.out
 ```
-
-## Related
-
-- [terraform-monorepo-example](https://github.com/0xDones/terraform-monorepo-example) - Example repo used in the tutorial
-- [Terragrunt](https://github.com/gruntwork-io/terragrunt) - Tool that inspired me to create `tfgen`
 
 Have fun!

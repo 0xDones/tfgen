@@ -17,7 +17,9 @@ func NewCleanCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]
-			clean(targetDir)
+			if err := clean(targetDir); err != nil {
+				log.Error().Err(err).Msg("Could not clean")
+			}
 		},
 	}
 }

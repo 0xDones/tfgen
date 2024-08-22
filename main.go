@@ -29,11 +29,14 @@ func main() {
 
 	rootCmd.AddCommand(cmd.NewExecCmd())
 	rootCmd.AddCommand(cmd.NewCleanCmd())
-	rootCmd.Execute()
+	if err := rootCmd.Execute(); err != nil {
+		log.Error().Err(err).Msg("Operation failed")
+	}
 }
 
 func initConfig() {
 	if verbose {
+		log.Info().Msg("Using verbose output")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 }
