@@ -34,6 +34,7 @@ func main() {
 
 func initConfig() {
 	if verbose {
+		log.Info().Msg("Using verbose output")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 }
