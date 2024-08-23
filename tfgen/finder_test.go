@@ -5,20 +5,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestSearchInParentDirs(t *testing.T) {
+func TestFindConfigFile(t *testing.T) {
 	assert := assert.New(t)
 	tempDir := t.TempDir()
 	println(tempDir)
 
-	os.MkdirAll(tempDir+"/dev/module-a/1/2/3", 0755)
-	os.MkdirAll(tempDir+"/dev/module-b/1/2/3", 0755)
-	os.MkdirAll(tempDir+"/dev/module-c/1/2/3", 0755)
+	require.NoError(t, os.MkdirAll(tempDir+"/dev/module-a/1/2/3", 0755))
+	require.NoError(t, os.MkdirAll(tempDir+"/dev/module-b/1/2/3", 0755))
+	require.NoError(t, os.MkdirAll(tempDir+"/dev/module-c/1/2/3", 0755))
 
-	os.WriteFile(tempDir+"/.tfgen.yaml", []byte(""), 0644)
-	os.WriteFile(tempDir+"/dev/.tfgen.yaml", []byte(""), 0644)
-	os.WriteFile(tempDir+"/dev/module-a/1/2/3/.tfgen.yaml", []byte(""), 0644)
+	require.NoError(t, os.WriteFile(tempDir+"/.tfgen.yaml", []byte(""), 0644))
+	require.NoError(t, os.WriteFile(tempDir+"/dev/.tfgen.yaml", []byte(""), 0644))
+	require.NoError(t, os.WriteFile(tempDir+"/dev/module-a/1/2/3/.tfgen.yaml", []byte(""), 0644))
 
 	tests := []struct {
 		input string
@@ -31,7 +32,7 @@ func TestSearchInParentDirs(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		result, _ := searchInParentDirs(tc.input, CONFIG_FILE_NAME, MAX_ITER)
+		result, _ := findConfigFile(tc.input)
 		assert.Equal(tc.want, result, "they should be equal")
 	}
 }

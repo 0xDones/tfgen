@@ -17,13 +17,15 @@ func NewCleanCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]
-			clean(targetDir)
+			if err := clean(targetDir); err != nil {
+				log.Error().Err(err).Msg("Could not clean")
+			}
 		},
 	}
 }
 
 func clean(targetDir string) error {
-	// Check if workindDir is directory and exists
+	// Check if targetDir is directory and exists
 	if dir, err := os.Stat(targetDir); os.IsNotExist(err) || !dir.IsDir() {
 		err := fmt.Errorf("path '%s' is not a directory or doesn't exist", targetDir)
 		log.Error().Err(err).Msg("")
@@ -35,8 +37,8 @@ func clean(targetDir string) error {
 		log.Fatal().Err(err).Msg("failed to get absolute path")
 	}
 
-	configHandler := tfgen.NewConfigHandler(absTargetDir)
-	if err := configHandler.ParseConfigFiles(); err != nil {
+	configHandler, err := tfgen.NewConfigHandler(absTargetDir)
+	if err != nil {
 		return err
 	}
 
