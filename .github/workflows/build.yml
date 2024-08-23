@@ -1,0 +1,80 @@
+name: build
+
+permissions: {} # no need any permissions
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+  - cron: '0 10 * * 1' # run "At 10:00 on Monday"
+  workflow_call:
+    inputs:
+      skipTests:
+        description: 'Skip tests, useful when there is a dedicated CI job for tests'
+        default: false
+        required: false
+        type: boolean
+
+jobs:
+  run:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: true
+      matrix:
+        go: ['stable', 'oldstable']
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Install Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+
+      - name: Go Format
+        run: gofmt -s -w . && git diff --exit-code
+
+      - name: Go Vet
+        run: go vet ./...
+
+      - name: Go Tidy
+        run: go mod tidy && git diff --exit-code
+
+      - name: Go Mod
+        run: go mod download
+
+      - name: Go Mod Verify
+        run: go mod verify
+
+      - name: Go Generate
+        run: go generate ./... && git diff --exit-code
+
+      - name: Go Build
+        run: go build -o /dev/null ./...
+
+      - name: Go Compile Tests
+        if: ${{ inputs.skipTests }}
+        run: go test -exec /bin/true ./...
+
+      - name: Go Test
+        if: ${{ !inputs.skipTests }}
+        run: go test -v -count=1 -race -shuffle=on -coverprofile=coverage.txt ./...
+
+      - name: Go Benchmark
+        if: ${{ !inputs.skipTests }}
+        run: go test -v -shuffle=on -run=- -bench=. -benchtime=1x ./...
+
+      - name: Upload Coverage
+        if: ${{ !inputs.skipTests }}
+        uses: codecov/codecov-action@v3
+        continue-on-error: true
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: ./coverage.txt
+          fail_ci_if_error: false

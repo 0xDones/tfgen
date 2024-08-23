@@ -8,21 +8,20 @@ import (
 )
 
 type ConfigFile struct {
-	RootFile      bool              `yaml:"root_file"`
-	Variables     map[string]string `yaml:"vars"`
+	IsRootFile    bool              `yaml:"root_file"`
+	TemplateVars  TemplateVars      `yaml:"vars"`
 	TemplateFiles map[string]string `yaml:"template_files"`
-	ConfigFileDir string
+	Directory     string
 }
 
-// NewConfigFile returns a new Config object
-func NewConfigFile(byteContent []byte, configFilePath string) (*ConfigFile, error) {
+// NewConfigFile returns a new ConfigFile from YAML bytes.
+func NewConfigFile(configFilePath string) (*ConfigFile, error) {
 	configFileDir := path.Dir(configFilePath)
 	log.Debug().Msgf("parsing config file: %s", configFilePath)
+	byteContent := ReadFile(configFilePath)
 	log.Debug().Msgf("file content: %+v", string(byteContent))
 	config := &ConfigFile{
-		TemplateFiles: make(map[string]string),
-		Variables:     make(map[string]string),
-		ConfigFileDir: configFileDir,
+		Directory: configFileDir,
 	}
 	err := yaml.Unmarshal(byteContent, config)
 	if err != nil {
@@ -32,10 +31,10 @@ func NewConfigFile(byteContent []byte, configFilePath string) (*ConfigFile, erro
 	return config, nil
 }
 
-// merge overrides existing fields with the ones from the newConfig
+// merge adds any template variables and template files from the supplied newConfig.
 func (c *ConfigFile) merge(newConfig *ConfigFile) {
-	for k, v := range newConfig.Variables {
-		c.Variables[k] = v
+	for k, v := range newConfig.TemplateVars {
+		c.TemplateVars[k] = v
 	}
 	for k, v := range newConfig.TemplateFiles {
 		c.TemplateFiles[k] = v

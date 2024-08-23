@@ -17,8 +17,8 @@ func ReadFile(path string) []byte {
 	return data
 }
 
+// WriteFile renders the template into the given file.
 func WriteFile(fileName string, templateBody string, templateData interface{}) error {
-
 	t, err := template.New(fileName).Option("missingkey=error").Parse(templateBody)
 	if err != nil {
 		return err
@@ -36,9 +36,4 @@ func WriteFile(fileName string, templateBody string, templateData interface{}) e
 	}
 
 	return nil
-}
-
-func DeleteFile(fileName string) error {
-	log.Debug().Msgf("deleting file: %s", fileName)
-	return os.Remove(fileName)
 }
