@@ -8,11 +8,11 @@ on:
   pull_request:
     branches: [main]
   schedule:
-  - cron: '0 10 * * 1' # run "At 10:00 on Monday"
+    - cron: "0 10 * * 1" # run "At 10:00 on Monday"
   workflow_call:
     inputs:
       skipTests:
-        description: 'Skip tests, useful when there is a dedicated CI job for tests'
+        description: "Skip tests, useful when there is a dedicated CI job for tests"
         default: false
         required: false
         type: boolean
@@ -25,14 +25,14 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        go: ['stable', 'oldstable']
+        go: ["stable", "oldstable"]
 
     steps:
       - name: Check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
           check-latest: true
@@ -72,7 +72,7 @@ jobs:
 
       - name: Upload Coverage
         if: ${{ !inputs.skipTests }}
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         continue-on-error: true
         with:
           token: ${{secrets.CODECOV_TOKEN}}
