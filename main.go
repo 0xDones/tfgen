@@ -9,8 +9,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version string
-var verbose bool
+var (
+	version string
+	verbose bool
+	dryRun  bool
+)
 
 func init() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
@@ -26,6 +29,7 @@ func main() {
 		Version: version,
 	}
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "verbose output")
+	rootCmd.PersistentFlags().BoolVarP(&dryRun, "dryRun", "t", false, "test only. changes will not be made.")
 
 	rootCmd.AddCommand(cmd.NewExecCmd())
 	rootCmd.AddCommand(cmd.NewCleanCmd())
@@ -38,5 +42,8 @@ func initConfig() {
 	if verbose {
 		log.Info().Msg("Using verbose output")
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+	if dryRun {
+		log.Info().Msg("Dry-run mode enabled - no changes will be made")
 	}
 }

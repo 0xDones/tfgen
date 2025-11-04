@@ -20,7 +20,8 @@ func NewExecCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			targetDir := args[0]
-			if err := exec(targetDir, recurse); err != nil {
+			dryRun, _ := cmd.Flags().GetBool("dryRun")
+			if err := exec(targetDir, recurse, dryRun); err != nil {
 				log.Error().Err(err).Msg("Could not execute")
 			}
 		},
@@ -29,27 +30,33 @@ func NewExecCmd() *cobra.Command {
 	return command
 }
 
-func exec(targetDir string, recurse bool) error {
+func exec(targetDir string, recurse, dryRun bool) error {
 	if recurse {
 		log.Info().Str("rootDir", targetDir).Msg("Recursing")
-		return filepath.WalkDir(targetDir, walkFunc)
+		return doWalk(targetDir, dryRun)
 	}
 
-	if err := execOne(targetDir); err != nil {
+	if err := execOne(dryRun, targetDir); err != nil {
 		return fmt.Errorf("could not execute inside %s: %w", targetDir, err)
 	}
 
 	return nil
 }
 
-func walkFunc(path string, d fs.DirEntry, err error) error {
+func doWalk(targetDir string, dryRun bool) error {
+	return filepath.WalkDir(targetDir, func(path string, d fs.DirEntry, err error) error {
+		return walkFunc(path, d, err, dryRun)
+	})
+}
+
+func walkFunc(path string, d fs.DirEntry, err error, dryRun bool) error {
 	if err != nil {
 		// Stop walking if there's any error
 		return err
 	}
 	if d.IsDir() {
 		// Omit .git directories in particular
-		if d.Name() == ".git" {
+		if d.Name() == ".git" || d.Name() == ".terrform" {
 			log.Debug().Str("path", path).Msg("Skipping .git directory")
 			return fs.SkipDir
 		}
@@ -61,7 +68,7 @@ func walkFunc(path string, d fs.DirEntry, err error) error {
 	if strings.HasSuffix(path, ".tf") {
 		log.Debug().Str("path", path).Msg("Found a directory containing a .tf file")
 		targetDir := filepath.Dir(path)
-		if err := execOne(targetDir); err != nil {
+		if err := execOne(dryRun, targetDir); err != nil {
 			return fmt.Errorf("could not execute inside %s: %w", targetDir, err)
 		}
 
@@ -72,7 +79,7 @@ func walkFunc(path string, d fs.DirEntry, err error) error {
 	return nil
 }
 
-func execOne(targetDir string) error {
+func execOne(dryRun bool, targetDir string) error {
 	log.Info().Str("targetDir", targetDir).Msg("Executing in new targetDir")
 
 	// Check if targetDir is a directory and exists
@@ -94,8 +101,14 @@ func execOne(targetDir string) error {
 	hasError := false
 	for templateName, templateBody := range configHandler.MergedConfigFile.TemplateFiles {
 		filePath := filepath.Join(configHandler.TargetDir, templateName)
-		if err := tfgen.WriteFile(filePath, templateBody, configHandler.TemplateVars); err != nil {
-			hasError = true
+		if !dryRun {
+			if err := tfgen.WriteFile(filePath, templateBody, configHandler.TemplateVars); err != nil {
+				hasError = true
+			}
+		} else {
+			if err := tfgen.DryRunFile(filePath, templateBody, configHandler.TemplateVars); err != nil {
+				hasError = true
+			}
 		}
 	}
 

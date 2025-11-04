@@ -71,7 +71,10 @@ func mergeFiles(configFiles []ConfigFile) ConfigFile {
 	rootConfig := configFiles[len(configFiles)-1]
 	// Iterate over the other configs in reverse order
 	for i := len(configFiles) - 2; i >= 0; i-- {
-		rootConfig.merge(&configFiles[i])
+		if rootConfig.TemplateFiles != nil {
+			rootConfig.merge(&configFiles[i])
+			log.Debug().Msgf("add template files: ", &configFiles[i])
+		}
 	}
 	return rootConfig
 }

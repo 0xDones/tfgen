@@ -18,7 +18,7 @@ type ConfigFile struct {
 func NewConfigFile(configFilePath string) (*ConfigFile, error) {
 	configFileDir := path.Dir(configFilePath)
 	log.Debug().Msgf("parsing config file: %s", configFilePath)
-	byteContent := ReadFile(configFilePath)
+	byteContent := ReadFile(configFilePath, false)
 	log.Debug().Msgf("file content: %+v", string(byteContent))
 	config := &ConfigFile{
 		Directory: configFileDir,
