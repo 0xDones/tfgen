@@ -45,6 +45,17 @@ This project uses semantic versioning with automatic version bumping based on co
 
 The version bump workflow automatically creates a git tag, which triggers the release workflow to build binaries for multiple platforms.
 
+### Required GitHub Secret Setup
+
+For the automatic versioning workflow to trigger the release workflow, you need to set up a Personal Access Token (PAT):
+
+1. Create a Personal Access Token with the following permissions:
+   - `contents: write` - to push tags
+   - `workflows: write` - to trigger other workflows
+2. Add the token as a repository secret named `PAT_TOKEN`
+
+**Why is this needed?** GitHub Actions' default `GITHUB_TOKEN` does not trigger other workflows for security reasons (to prevent recursive workflow runs). Using a PAT allows the version bump workflow to trigger the release workflow.
+
 ## Getting Started
 
 ### Prereqs
