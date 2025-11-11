@@ -1,0 +1,120 @@
+name: Version Bump
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  version-bump:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get latest tag
+        id: get_latest_tag
+        run: |
+          # Get the latest tag, if none exists use v0.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+
+      - name: Determine version bump
+        id: determine_bump
+        run: |
+          LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+          
+          # Get commits since last tag
+          if [ "$LATEST_TAG" = "v0.0.0" ]; then
+            COMMITS=$(git log --pretty=format:"%s" origin/main)
+          else
+            COMMITS=$(git log ${LATEST_TAG}..origin/main --pretty=format:"%s")
+          fi
+          
+          echo "Commits since last tag:"
+          echo "$COMMITS"
+          
+          # Determine bump type based on conventional commits
+          BUMP_TYPE="patch"
+          
+          # Check for breaking changes (major bump)
+          if echo "$COMMITS" | grep -qiE "^[a-zA-Z]+(\(.+\))?!:|BREAKING CHANGE:"; then
+            BUMP_TYPE="major"
+          # Check for features (minor bump)
+          elif echo "$COMMITS" | grep -qiE "^feat(\(.+\))?:"; then
+            BUMP_TYPE="minor"
+          # Check for fixes (patch bump) - this is the default
+          elif echo "$COMMITS" | grep -qiE "^fix(\(.+\))?:"; then
+            BUMP_TYPE="patch"
+          fi
+          
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Bump type: $BUMP_TYPE"
+
+      - name: Calculate new version
+        id: calc_version
+        run: |
+          LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+          BUMP_TYPE="${{ steps.determine_bump.outputs.bump_type }}"
+          
+          # Remove 'v' prefix if present
+          VERSION=${LATEST_TAG#v}
+          
+          # Split version into components
+          IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+          MAJOR="${VERSION_PARTS[0]:-0}"
+          MINOR="${VERSION_PARTS[1]:-0}"
+          PATCH="${VERSION_PARTS[2]:-0}"
+          
+          # Bump version based on type
+          case $BUMP_TYPE in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "New version: $NEW_VERSION"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          NEW_VERSION="${{ steps.calc_version.outputs.new_version }}"
+          if git rev-parse "$NEW_VERSION" >/dev/null 2>&1; then
+            echo "tag_exists=true" >> $GITHUB_OUTPUT
+            echo "Tag $NEW_VERSION already exists, skipping version bump"
+          else
+            echo "tag_exists=false" >> $GITHUB_OUTPUT
+            echo "Tag $NEW_VERSION does not exist, proceeding with version bump"
+          fi
+
+      - name: Create and push tag
+        if: steps.check_tag.outputs.tag_exists == 'false'
+        run: |
+          NEW_VERSION="${{ steps.calc_version.outputs.new_version }}"
+          git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+          git push origin "$NEW_VERSION"
+          echo "Created and pushed tag: $NEW_VERSION"
