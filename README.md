@@ -43,7 +43,7 @@ This project uses semantic versioning with automatic version bumping based on co
   - Example: `fix: correct state key generation`
   - Example: `docs: update installation guide`
 
-The version bump workflow automatically creates a git tag, which triggers the release workflow to build binaries for multiple platforms.
+The release workflow automatically bumps the version, creates a git tag, and builds binaries for multiple platforms.
 
 ## Getting Started
 

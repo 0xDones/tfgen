@@ -2,15 +2,36 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 permissions:
   contents: write
 
 jobs:
+  version-bump:
+    name: Bump Version and Tag
+    runs-on: ubuntu-latest
+    outputs:
+      new_tag: ${{ steps.tag_version.outputs.new_tag }}
+      new_version: ${{ steps.tag_version.outputs.new_version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          release_branches: main
+
   build:
     name: Build
+    needs: version-bump
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,7 +58,7 @@ jobs:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -o tfgen-${{ matrix.goos }}-${{ matrix.goarch }} -ldflags="-s -w -X main.version=${{ github.ref_name }}"
+          go build -o tfgen-${{ matrix.goos }}-${{ matrix.goarch }} -ldflags="-s -w -X main.version=${{ needs.version-bump.outputs.new_version }}"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -48,9 +69,8 @@ jobs:
 
   release:
     name: Create Release
-    needs: build
+    needs: [version-bump, build]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -66,6 +86,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ needs.version-bump.outputs.new_tag }}
           files: artifacts/**/tfgen-*
           draft: false
           prerelease: false
