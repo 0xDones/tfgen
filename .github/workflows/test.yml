@@ -22,6 +22,10 @@ jobs:
           go-version: '1.17'
 
       - name: Run tests
+        run: go test -json ./... | tee test-output.json | go run .github/scripts/test-summary.go
+      
+      - name: Display test output
+        if: always()
         run: go test -v ./...
 
   build:
