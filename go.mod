@@ -1,6 +1,6 @@
 module tfgen
 
-go 1.17
+go 1.25
 
 require (
 	github.com/rs/zerolog v1.29.1
