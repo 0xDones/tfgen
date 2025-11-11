@@ -27,6 +27,23 @@ Terragrunt alternative to keep your Terraform code consistent and DRY
 - Builtin functionality to provide the remote state key dynamically
 - YAML file configuration
 - Templates are parsed using `Go templates`
+- Automatic semantic versioning on every push to main
+
+## Versioning
+
+This project uses semantic versioning with automatic version bumping based on commit messages. When you push to the `main` branch, the version is automatically bumped based on your commit message format:
+
+- **Major version bump** (`x.0.0`): Use `feat!:` or include `BREAKING CHANGE:` in your commit message
+  - Example: `feat!: redesign configuration format`
+  - Example: `BREAKING CHANGE: remove deprecated command`
+- **Minor version bump** (`0.x.0`): Use `feat:` prefix for new features
+  - Example: `feat: add support for new cloud provider`
+  - Example: `feat(templates): add new template engine`
+- **Patch version bump** (`0.0.x`): Use `fix:` prefix for bug fixes or any other commit type
+  - Example: `fix: correct state key generation`
+  - Example: `docs: update installation guide`
+
+The version bump workflow automatically creates a git tag, which triggers the release workflow to build binaries for multiple platforms.
 
 ## Getting Started
 
