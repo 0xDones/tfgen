@@ -53,6 +53,12 @@ The release workflow automatically bumps the version, creates a git tag, and bui
 
 ### Installation
 
+#### Using Homebrew
+
+```bash
+brew install 0xDones/tap/tfgen
+```
+
 ```bash
 git clone --depth 1 git@github.com:0xDones/tfgen.git
 cd tfgen
