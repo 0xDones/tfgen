@@ -19,12 +19,10 @@ func NewExecCmd() *cobra.Command {
 		Use:   "exec <target directory>",
 		Short: "Execute the templates in the given target directory",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			targetDir := args[0]
 			dryRun, _ := cmd.Flags().GetBool("dryRun")
-			if err := exec(targetDir, recurse, dryRun); err != nil {
-				log.Error().Err(err).Msg("Could not execute")
-			}
+			return exec(targetDir, recurse, dryRun)
 		},
 	}
 	command.Flags().BoolVarP(&recurse, "recurse", "r", false, "recurse through child directories")
@@ -57,7 +55,7 @@ func walkFunc(path string, d fs.DirEntry, err error, dryRun bool) error {
 	}
 	if d.IsDir() {
 		// Omit .git directories in particular
-		if d.Name() == ".git" || d.Name() == ".terrform" {
+		if d.Name() == ".git" || d.Name() == ".terraform" {
 			log.Debug().Str("path", path).Msg("Skipping .git directory")
 			return fs.SkipDir
 		}

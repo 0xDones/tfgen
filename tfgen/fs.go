@@ -2,6 +2,8 @@ package tfgen
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"os"
 	"strings"
 	"text/template"
@@ -35,9 +37,15 @@ func WriteFile(fileName string, templateBody string, templateData interface{}) e
 		return err
 	}
 
-	if err := t.Execute(file, templateData); err != nil {
-		log.Error().Err(err).Msg("failed to execute templates")
-		return err
+	executeErr := t.Execute(file, templateData)
+	closeErr := file.Close()
+
+	if executeErr != nil {
+		log.Error().Err(executeErr).Msg("failed to execute templates")
+		return errors.Join(executeErr, closeErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("failed to close template file %q: %w", fileName, closeErr)
 	}
 
 	return nil

@@ -16,11 +16,8 @@ func NewCleanCmd() *cobra.Command {
 		Use:   "clean <target directory>",
 		Short: "clean templates from the target directory",
 		Args:  cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			targetDir := args[0]
-			if err := clean(targetDir); err != nil {
-				log.Error().Err(err).Msg("Could not clean")
-			}
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return clean(args[0])
 		},
 	}
 }

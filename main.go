@@ -36,6 +36,7 @@ func main() {
 	rootCmd.AddCommand(cmd.NewCleanCmd())
 	if err := rootCmd.Execute(); err != nil {
 		log.Error().Err(err).Msg("Operation failed")
+		os.Exit(1)
 	}
 }
 
